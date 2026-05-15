@@ -1,0 +1,86 @@
+.switch-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+.switch-wrap.disabled {
+  cursor: not-allowed;
+}
+.switch-track {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  border-radius: 5px;
+  background: var(--switch-off);
+  transition: background .2s;
+  flex-shrink: 0;
+}
+.switch-wrap.on .switch-track {
+  background: var(--switch-on);
+}
+.switch-wrap.disabled .switch-track {
+  background: var(--switch-off);
+}
+.switch-track-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+}
+.switch-disable-mark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+.switch-disable-mark::before,
+.switch-disable-mark::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 38px;
+  height: 2px;
+  background: var(--red-450);
+  transform-origin: center;
+}
+.switch-disable-mark::before {
+  transform: translate(-50%, -50%) rotate(29deg);
+}
+.switch-disable-mark::after {
+  transform: translate(-50%, -50%) rotate(-29deg);
+}
+.switch-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--text);
+  border: 1px solid var(--line);
+  transition: left .2s, background .2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+.switch-wrap.on .switch-thumb {
+  left: 18px;
+}
+.switch-wrap.disabled .switch-thumb {
+  background: #3a3f48;
+  border-color: #2a2e35;
+}
+.switch-label {
+  font-size: 13px;
+}
+.switch-wrap.disabled .switch-label {
+  opacity: 0.35;
+}

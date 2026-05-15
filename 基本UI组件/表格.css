@@ -1,0 +1,79 @@
+.table-wrap {
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  overflow: hidden;
+  background: #2a2e35;
+}
+.table-wrap.disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+.table-el {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.table-el th {
+  padding: 8px 14px;
+  font-size: 12px;
+  color: var(--muted);
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.15);
+  white-space: nowrap;
+}
+.table-el th:last-child {
+  border-right: none;
+}
+.table-el td {
+  padding: 6px 14px;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(58, 63, 72, 0.3);
+  border-right: 1px solid rgba(58, 63, 72, 0.3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.table-el td:last-child {
+  border-right: none;
+}
+.table-el tr:last-child td {
+  border-bottom: none;
+}
+.table-el tbody tr:hover td {
+  background: rgba(143, 148, 157, 0.08);
+}
+.table-el tbody tr.selected td {
+  background: rgba(143, 148, 157, 0.18);
+}
+.table-sm th { padding: 6px 10px; font-size: 11px; }
+.table-sm td { padding: 4px 10px; font-size: 12px; }
+.table-lg th { padding: 10px 18px; font-size: 13px; }
+.table-lg td { padding: 8px 18px; font-size: 14px; }
+.table-disable-mark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+.table-disable-mark::before,
+.table-disable-mark::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 2px;
+  background: var(--red-450);
+  transform-origin: center;
+}
+.table-disable-mark::before {
+  transform: translate(-50%, -50%) rotate(5deg);
+}
+.table-disable-mark::after {
+  transform: translate(-50%, -50%) rotate(-5deg);
+}

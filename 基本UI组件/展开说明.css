@@ -1,0 +1,16 @@
+.expand-note {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  border-top: 1px solid transparent;
+  transition: max-height .22s ease, opacity .22s ease, border-top-color .22s ease, padding-top .22s ease, transform .22s ease;
+  padding-top: 0;
+  transform: translateY(-4px);
+}
+.note-open > .expand-note {
+  max-height: var(--expand-note-max-height, 180px);
+  opacity: 1;
+  border-top: 1px solid var(--accent);
+  padding-top: 6px;
+  transform: translateY(0);
+}

@@ -1,0 +1,103 @@
+.slider-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.slider-wrap.disabled {
+  cursor: not-allowed;
+}
+.slider-track-wrap {
+  position: relative;
+  flex: 1;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+.slider-wrap.disabled .slider-track-wrap {
+  cursor: not-allowed;
+}
+.slider-track {
+  position: relative;
+  width: 100%;
+  height: 6px;
+  border-radius: 5px;
+  background: var(--slider-off);
+}
+.slider-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: 5px;
+  background: var(--slider-on);
+  pointer-events: none;
+}
+.slider-thumb {
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--text);
+  border: 1px solid var(--line);
+  transform: translate(-50%, -50%);
+  cursor: grab;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: box-shadow .15s;
+  z-index: 2;
+}
+.slider-thumb:hover {
+  box-shadow: 0 0 0 4px rgba(143, 148, 157, 0.2);
+}
+.slider-thumb:active {
+  cursor: grabbing;
+  box-shadow: 0 0 0 6px rgba(143, 148, 157, 0.25);
+}
+.slider-wrap.disabled .slider-thumb {
+  background: #3a3f48;
+  border-color: #2a2e35;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.slider-disable-mark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+.slider-disable-mark::before,
+.slider-disable-mark::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 2px;
+  background: var(--red-450);
+  transform-origin: center;
+}
+.slider-disable-mark::before {
+  transform: translate(-50%, -50%) rotate(5deg);
+}
+.slider-disable-mark::after {
+  transform: translate(-50%, -50%) rotate(-5deg);
+}
+.slider-label {
+  font-size: 12px;
+  min-width: 36px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.slider-wrap.disabled .slider-label {
+  opacity: 0.35;
+}
+.slider-sm .slider-track { height: 4px; }
+.slider-sm .slider-thumb { width: 12px; height: 12px; }
+.slider-md .slider-track { height: 6px; }
+.slider-md .slider-thumb { width: 16px; height: 16px; }
+.slider-lg .slider-track { height: 10px; }
+.slider-lg .slider-thumb { width: 20px; height: 20px; }

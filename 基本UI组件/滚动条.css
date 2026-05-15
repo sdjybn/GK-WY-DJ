@@ -1,0 +1,51 @@
+.scrollbar-host {
+  position: relative;
+  overflow: hidden;
+}
+.scrollbar-content {
+  width: 100%;
+  height: 100%;
+  overflow: scroll;
+}
+.scrollbar-content::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+.scrollbar-content {
+  scrollbar-width: none;
+}
+.float-bar {
+  position: absolute;
+  border-radius: 5px;
+  background: rgba(143, 148, 157, 0.35);
+  border: 1px solid rgba(143, 148, 157, 0.25);
+  transition: background .2s, opacity .3s;
+  opacity: 0;
+  z-index: 2;
+}
+.scrollbar-host:hover .float-bar,
+.scrollbar-host.scrolling .float-bar {
+  opacity: 1;
+}
+.float-bar:hover {
+  background: rgba(143, 148, 157, 0.55);
+  border-color: rgba(143, 148, 157, 0.4);
+}
+.float-bar-v {
+  right: 0;
+  top: 0;
+  width: 6px;
+}
+.float-bar-h {
+  bottom: 0;
+  left: 0;
+  height: 6px;
+}
+.float-bar-corner {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 6px;
+  height: 6px;
+  z-index: 3;
+}

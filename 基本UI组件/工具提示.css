@@ -1,0 +1,82 @@
+.tooltip-el {
+  position: absolute;
+  z-index: 10000;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: #1e2128;
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .15s, visibility .15s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+.tooltip-el.visible {
+  opacity: 1;
+  visibility: visible;
+}
+.tooltip-el::before {
+  content: "";
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #1e2128;
+  border: 1px solid var(--line);
+  transform: rotate(45deg);
+}
+.tooltip-top::before {
+  bottom: -4px;
+  left: 50%;
+  margin-left: -3px;
+  border-top: none;
+  border-left: none;
+}
+.tooltip-bottom::before {
+  top: -4px;
+  left: 50%;
+  margin-left: -3px;
+  border-bottom: none;
+  border-right: none;
+}
+.tooltip-left::before {
+  right: -4px;
+  top: 50%;
+  margin-top: -3px;
+  border-bottom: none;
+  border-left: none;
+}
+.tooltip-right::before {
+  left: -4px;
+  top: 50%;
+  margin-top: -3px;
+  border-top: none;
+  border-right: none;
+}
+.tooltip-top-left::before {
+  bottom: -4px;
+  left: 12px;
+  border-top: none;
+  border-left: none;
+}
+.tooltip-top-right::before {
+  bottom: -4px;
+  right: 12px;
+  border-top: none;
+  border-left: none;
+}
+.tooltip-bottom-left::before {
+  top: -4px;
+  left: 12px;
+  border-bottom: none;
+  border-right: none;
+}
+.tooltip-bottom-right::before {
+  top: -4px;
+  right: 12px;
+  border-bottom: none;
+  border-right: none;
+}

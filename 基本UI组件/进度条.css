@@ -1,0 +1,63 @@
+.progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.progress-track {
+  position: relative;
+  flex: 1;
+  height: 8px;
+  border-radius: 5px;
+  background: var(--progress-off);
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 5px;
+  background: var(--progress-on);
+  transition: width .3s ease;
+}
+.progress-wrap.disabled .progress-track {
+  opacity: 0.35;
+}
+.progress-wrap.disabled .progress-fill {
+  opacity: 0.5;
+}
+.progress-disable-mark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+.progress-disable-mark::before,
+.progress-disable-mark::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 2px;
+  background: var(--red-450);
+  transform-origin: center;
+}
+.progress-disable-mark::before {
+  transform: translate(-50%, -50%) rotate(8deg);
+}
+.progress-disable-mark::after {
+  transform: translate(-50%, -50%) rotate(-8deg);
+}
+.progress-label {
+  font-size: 12px;
+  min-width: 36px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.progress-wrap.disabled .progress-label {
+  opacity: 0.35;
+}
+.progress-sm .progress-track { height: 4px; }
+.progress-md .progress-track { height: 8px; }
+.progress-lg .progress-track { height: 14px; }

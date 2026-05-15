@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>AI大脚本时代 — 当人人都有AI，规则将彻底崩溃</title>
+<link rel="stylesheet" href="基本UI组件/颜色系统.css">
+<link rel="stylesheet" href="基本UI组件/文本系统.css">
+<link rel="stylesheet" href="基本UI组件/标签页.css">
+<style>
+:root {
+  --bg-deep: #06060a;
+  --accent-cyan: #00e5ff;
+  --accent-gold: #e6b422;
+  --accent-red: #ff5252;
+  --accent-green: #69f0ae;
+  --accent-purple: #b388ff;
+  --accent-orange: #ff9100;
+  --glow-cyan: rgba(0, 229, 255, 0.15);
+  --glow-gold: rgba(230, 180, 34, 0.12);
+  --glow-red: rgba(255, 82, 82, 0.12);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 24px;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 40%, rgba(0, 229, 255, 0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 30% 60%, rgba(230, 180, 34, 0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 30% at 70% 70%, rgba(179, 136, 255, 0.04) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.hero-grid {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image:
+    linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, black 20%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, black 20%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-title {
+  font-size: clamp(36px, 7vw, 80px);
+  font-weight: 900;
+  letter-spacing: 6px;
+  line-height: 1.2;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-title .line1 {
+  display: block;
+  color: var(--accent-cyan);
+  text-shadow: 0 0 40px rgba(0, 229, 255, 0.3), 0 0 80px rgba(0, 229, 255, 0.1);
+}
+
+.hero-title .line2 {
+  display: block;
+  background: linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-orange) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-top: 8px;
+}
+
+.hero-subtitle {
+  font-size: clamp(14px, 2.5vw, 20px);
+  color: var(--muted);
+  margin-top: 24px;
+  max-width: 680px;
+  line-height: 1.8;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-subtitle strong {
+  color: var(--accent-cyan);
+}
+
+.hero-scroll {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 2px;
+  z-index: 1;
+  animation: scrollHint 2s ease-in-out infinite;
+}
+
+.hero-scroll .arrow {
+  width: 20px;
+  height: 20px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(45deg);
+}
+
+@keyframes scrollHint {
+  0%, 100% { opacity: 0.4; transform: translateX(-50%) translateY(0); }
+  50% { opacity: 1; transform: translateX(-50%) translateY(8px); }
+}
+
+.content {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px 80px;
+}
+
+.section {
+  margin-bottom: 64px;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.section.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.section-label {
+  font-size: 12px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--accent-cyan);
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.section-title {
+  font-size: clamp(24px, 4vw, 36px);
+  font-weight: 800;
+  line-height: 1.3;
+  margin-bottom: 24px;
+}
+
+.section-title .highlight-cyan { color: var(--accent-cyan); }
+.section-title .highlight-gold { color: var(--accent-gold); }
+.section-title .highlight-red { color: var(--accent-red); }
+.section-title .highlight-green { color: var(--accent-green); }
+.section-title .highlight-purple { color: var(--accent-purple); }
+
+.analogy-box {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--accent-gold);
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.analogy-box .analogy-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent-gold);
+  margin-bottom: 12px;
+}
+
+.analogy-box p {
+  font-size: 15px;
+  line-height: 1.9;
+  color: var(--text);
+}
+
+.analogy-box p strong {
+  color: var(--accent-gold);
+}
+
+.paragraph {
+  font-size: 15px;
+  line-height: 2;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+
+.paragraph strong { color: var(--accent-cyan); }
+.paragraph .gold { color: var(--accent-gold); }
+.paragraph .red { color: var(--accent-red); }
+.paragraph .green { color: var(--accent-green); }
+
+.bullet-list {
+  list-style: none;
+  margin-bottom: 16px;
+  padding: 0;
+}
+
+.bullet-list li {
+  font-size: 15px;
+  line-height: 2;
+  padding-left: 20px;
+  position: relative;
+  color: var(--text);
+}
+
+.bullet-list li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: var(--accent-cyan);
+  font-weight: 700;
+}
+
+.bullet-list li strong { color: var(--accent-gold); }
+.bullet-list li .red { color: var(--accent-red); }
+.bullet-list li .green { color: var(--accent-green); }
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 28px;
+  margin-bottom: 20px;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.card:hover {
+  border-color: rgba(0, 229, 255, 0.3);
+  background: var(--panel-hover);
+}
+
+.card-number {
+  font-size: 48px;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  opacity: 0.6;
+}
+
+.card-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent-cyan);
+  margin-bottom: 12px;
+}
+
+.card p {
+  font-size: 14px;
+  line-height: 1.9;
+  color: var(--text);
+}
+
+.card p strong { color: var(--accent-gold); }
+.card p .green { color: var(--accent-green); }
+.card p .red { color: var(--accent-red); }
+.card p .purple { color: var(--accent-purple); }
+
+.divider {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--line), transparent);
+  margin: 48px 0;
+}
+
+.timeline {
+  position: relative;
+  padding-left: 32px;
+  margin-bottom: 16px;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, var(--accent-cyan), var(--accent-gold), var(--accent-red));
+  border-radius: 1px;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -28px;
+  top: 8px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.4);
+}
+
+.timeline-item:nth-child(2)::before { background: var(--accent-gold); box-shadow: 0 0 12px rgba(230, 180, 34, 0.4); }
+.timeline-item:nth-child(3)::before { background: var(--accent-red); box-shadow: 0 0 12px rgba(255, 82, 82, 0.4); }
+
+.timeline-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent-cyan);
+  margin-bottom: 4px;
+}
+
+.timeline-item:nth-child(2) .timeline-label { color: var(--accent-gold); }
+.timeline-item:nth-child(3) .timeline-label { color: var(--accent-red); }
+
+.timeline-text {
+  font-size: 14px;
+  line-height: 1.9;
+  color: var(--text);
+}
+
+.timeline-text strong { color: var(--accent-gold); }
+
+.conclusion-box {
+  background: linear-gradient(135deg, rgba(0, 229, 255, 0.05), rgba(230, 180, 34, 0.05));
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  border-radius: 12px;
+  padding: 32px;
+  text-align: center;
+}
+
+.conclusion-box .conclusion-title {
+  font-size: 22px;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 16px;
+}
+
+.conclusion-box p {
+  font-size: 15px;
+  line-height: 2;
+  color: var(--text);
+  max-width: 700px;
+  margin: 0 auto 12px;
+}
+
+.conclusion-box p strong { color: var(--accent-gold); }
+.conclusion-box p .cyan { color: var(--accent-cyan); }
+.conclusion-box p .red { color: var(--accent-red); }
+
+.footer {
+  text-align: center;
+  padding: 40px 24px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+.footer a {
+  color: var(--accent-gold);
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+.counter {
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 24px;
+}
+
+.counter span {
+  color: var(--accent-gold);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+@media (max-width: 640px) {
+  .hero { padding: 60px 16px 80px; }
+  .content { padding: 0 16px 60px; }
+  .card { padding: 20px; }
+  .analogy-box { padding: 16px; }
+  .conclusion-box { padding: 24px 16px; }
+  #hero-tabs { padding: 0 16px; }
+}
+
+#hero-tabs .tabs-wrap {
+  border-color: var(--line);
+  background: var(--panel);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+#hero-tabs .tabs-bar {
+  background: var(--bg-deep, #06060a);
+  display: flex;
+  justify-content: center;
+}
+
+#hero-tabs .tabs-tab {
+  flex: 1;
+  text-align: center;
+}
+
+#hero-tabs .tabs-tab.active {
+  box-shadow: inset 0 -2px 0 var(--accent-cyan);
+}
+
+#hero-tabs .tabs-pane .paragraph {
+  font-size: 15px;
+  line-height: 2;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+
+#hero-tabs .tabs-pane .paragraph strong { color: var(--accent-cyan); }
+#hero-tabs .tabs-pane .paragraph .gold { color: var(--accent-gold); }
+#hero-tabs .tabs-pane .paragraph .red { color: var(--accent-red); }
+#hero-tabs .tabs-pane .paragraph .green { color: var(--accent-green); }
+
+#hero-tabs .tabs-pane .analogy-box {
+  background: var(--bg-deep, #06060a);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--accent-gold);
+  border-radius: 8px;
+  padding: 24px;
+}
+
+#hero-tabs .tabs-pane .analogy-box .analogy-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent-gold);
+  margin-bottom: 12px;
+}
+
+#hero-tabs .tabs-pane .analogy-box p {
+  font-size: 15px;
+  line-height: 1.9;
+  color: var(--text);
+}
+
+#hero-tabs .tabs-pane .analogy-box p strong { color: var(--accent-gold); }
+#hero-tabs .tabs-pane .analogy-box p .red { color: var(--accent-red); }
+#hero-tabs .tabs-pane .analogy-box p .green { color: var(--accent-green); }
+#hero-tabs .tabs-pane .analogy-box p .gold { color: var(--accent-gold); }
+
+.def-row {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.def-card {
+  flex: 1;
+  border-radius: 10px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.def-card-green {
+  background: rgba(105, 240, 174, 0.10);
+  border: 1px solid rgba(105, 240, 174, 0.30);
+}
+
+.def-card-gold {
+  background: rgba(230, 180, 34, 0.10);
+  border: 1px solid rgba(230, 180, 34, 0.30);
+}
+
+.def-card-red {
+  background: rgba(255, 82, 82, 0.10);
+  border: 1px solid rgba(255, 82, 82, 0.30);
+}
+
+.def-card-title {
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1;
+  text-align: center;
+}
+
+.def-card-green .def-card-title { color: var(--accent-green); }
+
+.def-card-gold .def-card-title { color: var(--accent-gold); }
+.def-card-red .def-card-title { color: var(--accent-red); }
+
+.def-card-verdict {
+  font-size: 15px;
+  font-weight: 800;
+  padding: 10px;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  align-self: center;
+}
+
+.def-card-essence {
+  font-size: 15px;
+  font-weight: 700;
+  opacity: 0.95;
+}
+
+.def-card-green .def-card-verdict {
+  background: rgba(105, 240, 174, 0.15);
+  color: var(--accent-green);
+}
+
+.def-card-green .def-card-essence { color: var(--accent-green); }
+
+.def-card-gold .def-card-verdict {
+  background: rgba(230, 180, 34, 0.15);
+  color: var(--accent-gold);
+}
+
+.def-card-gold .def-card-essence { color: var(--accent-gold); }
+
+.def-card-red .def-card-verdict {
+  background: rgba(255, 82, 82, 0.15);
+  color: var(--accent-red);
+}
+
+.def-card-red .def-card-essence { color: var(--accent-red); }
+
+.def-card-desc {
+  font-size: 14px;
+  line-height: 1.9;
+  color: var(--text);
+}
+
+.def-footer {
+  margin-top: 20px;
+  font-size: 14px;
+  line-height: 1.9;
+  color: var(--muted);
+  text-align: center;
+}
+
+.def-footer strong { color: var(--accent-cyan); }
+
+@media (max-width: 640px) {
+  .def-row { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="hero-grid"></div>
+  <h1 class="hero-title">
+    <span class="line1">AI大脚本时代</span>
+    <span class="line2">规则将彻底崩溃</span>
+  </h1>
+  <p class="hero-subtitle">
+    当AI助手如同<strong>智能手机</strong>一样普及，变成每一个玩家的"标配"时——<br>
+    现有的规则体系，将面临<strong>不可逆转</strong>的颠覆。
+  </p>
+  <div class="hero-scroll">
+    <span>向下探索</span>
+    <div class="arrow"></div>
+  </div>
+</section>
+
+<div class="content">
+
+<div id="hero-tabs" style="max-width:1100px;margin:0 auto 48px;padding:0 24px;"></div>
+
+  <section class="section" id="s-core">
+    <div class="section-label">核心理论</div>
+    <div class="section-title">"<span class="highlight-gold">技术范式转移</span>" (Paradigm Shift)——<br>技术普及摧毁旧规则的历史铁律</div>
+    <div class="analogy-box">
+      <div class="analogy-title">🧠 认知科学论断：必然的"认知卸载"</div>
+      <p>在认知心理学中有一个概念叫<strong>"认知卸载" (Cognitive Offloading)</strong>：人类总是倾向于将机械的、重复的计算或劳动交给外部工具——计算器、导航、搜索引擎、AI——以释放精力去处理更高级的决策。这不是投机取巧，而是人类进化形成的<strong>认知本能</strong>。</p>
+      <p style="margin-top: 8px;">1980年代，数学界曾视计算器为<strong>"作弊"</strong>。但当计算器成为大众的基础设施时，规则的<strong>范式转移</strong>发生了：考试不再考死记硬背的加减乘除，而是考逻辑建模。因为测试一种已经被完美自动化的底层技能，毫无意义。</p>
+    </div>
+    <p class="paragraph">
+      同样的逻辑，当<strong>"人人都拥有AI系统级助手"</strong>的时代到来，靠"爆肝"和"肌肉记忆"建立的游戏门槛将遭遇毁灭性打击。整个游戏生态和评判标准，必将发生不可逆转的<strong>范式转移</strong>。这不是假设，这是认知科学揭示的<strong>必然宿命</strong>。
+    </p>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section" id="s-law">
+    <div class="section-label">第一变</div>
+    <div class="section-title">"<span class="highlight-red">法不责众</span>"——<br>当AI脚本成为<span class="highlight-gold">基础设施</span>，违约界定将名存实亡</div>
+    <div class="analogy-box">
+      <div class="analogy-title">🏗 科技社会学论断：技术基础设施化 (Infrastructuralization)</div>
+      <p>STS（科技与社会研究）理论指出：一项技术刚出现时往往是显性的、特权的（如早期的汽车、早期的外挂）；但当它普及到一定程度，就会变成<strong>"基础设施"</strong>——像水电网络一样<strong>透明且不可剥离</strong>。此时，针对它的禁用规则将自动失效。你无法立法禁止人用自来水，也无法立法禁止人使用操作系统自带的AI。</p>
+    </div>
+    <p class="paragraph">
+      如果一个游戏里有<span class="red">80%甚至100%</span>的玩家都在使用系统级AI助手——比如未来的Windows自带AI，或者苹果系统内置的智能Agent帮你挂机——游戏公司面临的将是<strong>绝境</strong>：
+    </p>
+    <ul class="bullet-list">
+      <li><strong>不可能封号：</strong>封杀所有用AI的玩家，等于<span class="red">直接倒闭</span>。</li>
+      <li><strong>ToS（服务条款）被迫修改：</strong>游戏公司不仅不会再把"使用AI"列为违规，甚至可能会在协议里<span class="gold">默认或允许</span>玩家使用常规AI进行枯燥操作。</li>
+      <li>法律和违约的界限将<strong>彻底消解</strong>。因为当一种技术从"外挂"蜕变为操作系统级的<span class="gold">"基础设施"</span>时，它就不再是可惩罚的"作弊工具"，而是<strong>人人平等享有的公共能力</strong>。你无法起诉微软或苹果的底层AI系统"破坏了游戏公平"。</li>
+    </ul>
+    <p class="paragraph">
+      触发这一切的条件并不遥远——不需要AI达到"通用人工智能"的神话级别，只需要一个务实的门槛：<strong>AI的智能程度和性价比达到"足够好用且几乎免费"</strong>。当操作系统自带的AI就能理解游戏画面、执行合理操作，且无需额外成本或技术门槛时，临界点就会被触发。而这个门槛，正在被快速逼近。
+    </p>
+    <p class="paragraph">
+      临界点的蔓延路径是清晰可预测的：
+    </p>
+    <ul class="bullet-list">
+      <li><strong>单机游戏率先普及：</strong>没有封号机制，没有社交压力，没有道德争议——AI助手在单机游戏中没有任何采用阻力。当玩家习惯了"AI帮我刷素材、自动跑图、优化战斗"的体验，这种便利会迅速变成<span class="gold">默认期望</span>。</li>
+      <li><strong>体验习惯不可逆迁移：</strong>带着单机游戏中养成的AI使用习惯，玩家会自然而然地在网游中寻求同样的体验。就像习惯了自动挡的人不会再主动买手动挡——<span class="gold">体验的降级是不可逆的</span>。</li>
+      <li><strong>逻辑框架自行瓦解：</strong>从少数人到多数人，从隐蔽到公开，从羞耻到理所当然。当使用AI脚本的玩家比例足够高时，<span class="red">"脚本=违法"的思维逻辑将不再成立</span>——不是规则被打破了，而是支撑那条规则的思维基础本身，变得<strong>荒谬</strong>。</li>
+    </ul>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section" id="s-death">
+    <div class="section-label">第二变</div>
+    <div class="section-title"><span class="highlight-red">去技能化 (Deskilling)</span>：<br>游戏底层逻辑的<span class="highlight-red">彻底死亡</span>与<span class="highlight-green">再技能化 (Reskilling)</span></div>
+    <div class="analogy-box">
+      <div class="analogy-title">🔧 劳动社会学论断：去技能化与再技能化</div>
+      <p>哈里·布雷弗曼（Harry Braverman）的劳动过程理论指出：随着自动化的引入，劳动者原本依赖的传统手艺和硬核技能变得毫无价值——这是<strong>"去技能化"</strong>；而为了适应新环境，人类被迫去学习更宏观、更抽象的系统管理能力——这是<strong>"再技能化"</strong>。</p>
+      <p style="margin-top: 8px;">AI脚本让玩家的"走位、连招、刷金币"被彻底<strong>去技能化</strong>（变相一文不值），并逼迫玩家在统筹、策略维度进行<strong>再技能化</strong>。这不是衰退，这是劳动形态的升维进化。</p>
+    </div>
+    <p class="paragraph">
+      既然"操作"和"肝（重复劳动）"都可以由AI完美代劳，并且大家都这么干，那么<strong>传统游戏设计中那些靠"堆叠时间"来获取成就感的玩法，将彻底宣告死亡。</strong>
+    </p>
+    <p class="paragraph">
+      游戏公司为了活下去，只能全面转型。游戏本身将演化为以下形态：
+    </p>
+  </section>
+
+  <section class="section" id="s-evo1">
+    <div class="card">
+      <div class="card-number">01</div>
+      <div class="card-title">从"微操玩家"变成"AI驯兽师/管理者"</div>
+      <p>
+        当你的AI可以自动打怪、跑图时，你玩游戏的核心就不再是"按键盘"，而是<strong>"资源分配和策略制定"</strong>。<br><br>
+        就像早期的《星际争霸》，你需要自己点农民采矿（微操）；但《帝国时代六》可能会变成：你向你的AI副官下达战略安排——<span class="green">"对这片区域进行侦察，顺便规划路线把羊都抓回来"</span>——然后你作为一个"长官"来统筹全局。<br><br>
+        游戏演变成了纯粹的<strong>策略管理游戏</strong>。
+      </p>
+    </div>
+  </section>
+
+  <section class="section" id="s-evo2">
+    <div class="card">
+      <div class="card-number">02</div>
+      <div class="card-title">游戏的门槛将被推向"人类特有的领域"</div>
+      <p>
+        AI能做到完美的肌肉记忆和数据计算，但AI很难做到：
+      </p>
+      <ul class="bullet-list" style="margin-top: 12px;">
+        <li><strong>人际情感博弈：</strong>像《太空狼人杀》（Among Us）、《剧本杀》这种需要察言观色、欺骗、心理博弈的<span class="purple">社交游戏</span>。</li>
+        <li><strong>不规则的创造力：</strong>像《我的世界》（Minecraft）中随心所欲的<span class="purple">建筑创作</span>。</li>
+      </ul>
+      <p style="margin-top: 12px;">
+        当所有的"打怪升级"失去意义后，未来的网游将变得极其注重<strong>"社交、共鸣和创造"</strong>。
+      </p>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section" id="s-timeline">
+    <div class="section-label">演进路径</div>
+    <div class="section-title">从<span class="highlight-cyan">禁令</span>到<span class="highlight-gold">妥协</span>到<span class="highlight-red">重生</span></div>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-label">第一阶段：禁令与对抗</div>
+        <div class="timeline-text">游戏公司封号、更新反作弊、修改ToS禁止AI。少数使用者被定义为"作弊者"，舆论一边倒谴责。但这只是<strong>黎明前的挣扎</strong>。</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-label">第二阶段：法不责众与妥协</div>
+        <div class="timeline-text">当AI成为操作系统级功能，使用率突破临界点。封号等于自杀，ToS被迫修改，<strong>游戏公司开始默认甚至拥抱AI</strong>。</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-label">第三阶段：规则重生</div>
+        <div class="timeline-text">游戏设计彻底转型。"肝"和"微操"不再是核心玩法，<strong>策略、社交、创造</strong>成为新的竞争维度。一个全新的游戏时代诞生。</div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="section" id="s-conclusion">
+    <div class="conclusion-box">
+      <div class="conclusion-title">展望未来</div>
+      <p>
+        当<span class="cyan">"AI副官"</span>成为普世技术，它将像当年<span class="red">"汽车取代马车"</span>一样不可逆转。
+      </p>
+      <p>
+        各行各业都会实现AI托管辅助操作，游戏甚至会比其他实体产业更进一步的拥抱AI助手——因为这个应用场景的广泛和需求量的庞大。
+      </p>
+    </div>
+  </section>
+
+  <div class="counter">👁 页面访问量：<span id="visitCount">...</span> 次</div>
+</div>
+
+<footer class="footer">
+  作者B站：<a href="https://space.bilibili.com/8089909" target="_blank">sdjybn</a> 欢迎关注～<br>
+  论点讨论部分存在AI参与。可以点击查看：<a href="https://chat.deepseek.com/share/zf7ha737e6f8hw6aim" target="_blank">AI讨论记录</a>
+</footer>
+
+<script>
+(function() {
+  function revealSections() {
+    var sections = document.querySelectorAll('.section');
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    sections.forEach(function(s) { observer.observe(s); });
+  }
+
+  function initCounter() {
+    var el = document.getElementById('visitCount');
+    if (!el) return;
+    var key = 'ai-script-era-views';
+    var stored = localStorage.getItem(key);
+    var count = stored ? parseInt(stored, 10) : 0;
+    var sessionKey = 'ai-script-era-session';
+    if (!sessionStorage.getItem(sessionKey)) {
+      count++;
+      localStorage.setItem(key, count);
+      sessionStorage.setItem(sessionKey, '1');
+    }
+    el.textContent = count;
+  }
+
+  revealSections();
+  initCounter();
+})();
+</script>
+<script src="基本UI组件/颜色系统.js"></script>
+<script src="基本UI组件/文本系统.js"></script>
+<script src="基本UI组件/标签页.js"></script>
+<script>
+(function() {
+  injectColorCSSVars();
+
+  var pane1 = document.createElement("div");
+  pane1.innerHTML =
+    '<div class="def-row">' +
+      '<div class="def-card def-card-green">' +
+        '<div class="def-card-title">绿玩/代练</div>' +
+        '<div class="def-card-verdict"><span>纯人工操作</span><span class="def-card-essence">本质：人力本身</span></div>' +
+        '<div class="def-card-desc">不使用任何脚本、外挂，不打任何补丁和辅助工具的场景。<br>纯人类的玩家，使用基础的设备，进行最基本的游玩。完整体验游戏作者提供的内容。</div>' +
+        '</div>' +
+      '<div class="def-card def-card-gold">' +
+        '<div class="def-card-title">脚本/助手</div>' +
+        '<div class="def-card-verdict"><span>模仿人类行为执行操作</span><span class="def-card-essence">本质：替代执行</span></div>' +
+        '<div class="def-card-desc">非人类操作的，使用提供给人类的接口执行操作的行为。<br>使用基本的设备接口，不修改和读取游戏数据。<br>在与人类相同的游戏规则内工作，最出名的就是阿尔法狗。</div>' +
+        '</div>' +
+      '<div class="def-card def-card-red">' +
+        '<div class="def-card-title">外挂/补丁</div>' +
+        '<div class="def-card-verdict"><span>非授权的游戏数据读取或修改</span><span class="def-card-essence">本质：破坏规则</span></div>' +
+        '<div class="def-card-desc">非授权访问或越权访问受保护的计算机系统。<br>如：在非授权情况下，读取、篡改游戏数据。修改游戏文件。<br>案例为"打补丁""改数据""监测血量"<br>主要表现为破坏规则。与脚本存在本质不同。</div>' +
+        '</div>' +
+    '</div>' +
+    '<div class="def-footer">脚本的主要问题来源在于不平等，不是每个人都拥有的，并且会造成设计者意图外的游玩场景。如24小时不停操作的打金脚本。<br>而主要问题在于违反游戏厂商的使用规则和带来的额外优势。<br>我认为脚本相关的认知会在未来，AI智能不断提高后，迎来认知革新。使旧有的理论框架过时。<br><br>对脚本的抵制，最终往往可以追溯到一种"你必须以特定方式受苦才配得到奖励"的前现代观念。当技术让受苦不再是必要条件时，这种观念的逻辑基础就瓦解了。</div>';
+
+  var pane2 = document.createElement("div");
+  pane2.innerHTML =
+    '<p class="paragraph" style="margin-top:8px">认知科学中的<strong>"认知卸载" (Cognitive Offloading)</strong>揭示了一个基本规律：人类天生就会把机械重复的任务"卸载"给外部工具，以释放脑力去处理更高阶的问题。这条规律贯穿整个人类技术史——每一次新的"卸载"都伴随着旧规则的崩塌和新规则的重建。</p>' +
+    '<div class="analogy-box" style="margin-top:16px"><div class="analogy-title">📍 案例：GPS导航</div><p>曾几何时，老司机嘲笑用导航的人是"路痴"。今天<span class="gold">人人都用导航</span>，出租车资格考试已不再考"背诵全城地图"。导航从"作弊"变成了<span class="green">基础设施</span>。</p></div>' +
+    '<div class="analogy-box" style="margin-top:12px"><div class="analogy-title">🔍 案例：搜索引擎</div><p>当年教育界恐慌：学生用搜索引擎查答案，会丧失记忆力和思考能力。如今，信息检索已成为<span class="gold">学术研究的基本功</span>，考试从"考背诵"转向了<span class="green">考分析与综合</span>。</p></div>' +
+    '<div class="analogy-box" style="margin-top:12px"><div class="analogy-title">🎮 案例：AI游戏脚本（当下正在发生）</div><p>游戏界目前正处在计算器1980年代的阶段——封号、抵制、道德谴责。但认知卸载规律告诉我们：这不过是<span class="red">黎明前的挣扎</span>。当AI助手成为操作系统的标配时，禁止AI打游戏将像禁止使用计算器一样<span class="gold">荒谬且不可执行</span>，游戏规则将经历又一次范式转移。</p></div>' +
+    '<p class="paragraph" style="margin-top:16px">每一次技术带来的"认知卸载"，都曾被上一代人视为<span class="red">"作弊"或"退化"</span>。但历史反复证明：<strong>规则从不消灭技术，规则只会被技术重塑</strong>。AI游戏脚本不会例外。</p>';
+
+  var tabs = createTabs({
+    size: "lg",
+    activeIndex: 0,
+    tabs: [
+      { label: "外挂和脚本的定义", content: pane1 },
+      { label: "认知卸载：人类的工具本能", content: pane2 }
+    ]
+  });
+
+  document.getElementById("hero-tabs").appendChild(tabs);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+.stroked-text {
+  paint-order: stroke fill;
+  -webkit-text-stroke-width: 0.8px;
+  line-height: 1.4;
+}
+.stroked-text.thick {
+  -webkit-text-stroke-width: 1.5px;
+}

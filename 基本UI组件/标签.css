@@ -1,0 +1,51 @@
+.tag-el {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 5px;
+  white-space: nowrap;
+  line-height: 1;
+}
+.tag-fill {
+  padding: 4px 10px;
+  color: #fff;
+}
+.tag-outline {
+  padding: 3px 9px;
+  border: 1px solid;
+  background: transparent;
+}
+.tag-ghost {
+  padding: 4px 10px;
+  background: rgba(143, 148, 157, 0.1);
+  color: var(--text);
+}
+.tag-sm { font-size: 11px; }
+.tag-md { font-size: 12px; }
+.tag-lg { font-size: 13px; }
+.tag-close {
+  width: 14px;
+  height: 14px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  color: inherit;
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+  font-family: inherit;
+  transition: background .15s;
+}
+.tag-close:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+.tag-outline .tag-close {
+  background: rgba(143, 148, 157, 0.15);
+}
+.tag-outline .tag-close:hover {
+  background: rgba(143, 148, 157, 0.3);
+}
