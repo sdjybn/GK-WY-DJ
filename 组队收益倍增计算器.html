@@ -1,0 +1,2300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>流放之路2 组队收益倍增计算器</title>
+<link rel="stylesheet" href="基本UI组件/颜色系统.css">
+<link rel="stylesheet" href="基本UI组件/文本系统.css">
+<link rel="stylesheet" href="基本UI组件/滚动条.css">
+<link rel="stylesheet" href="基本UI组件/面板.css">
+<link rel="stylesheet" href="基本UI组件/可折叠面板.css">
+<link rel="stylesheet" href="基本UI组件/数字输入框.css">
+<link rel="stylesheet" href="基本UI组件/标签.css">
+<link rel="stylesheet" href="基本UI组件/分割线.css">
+<link rel="stylesheet" href="基本UI组件/工具提示.css">
+<link rel="stylesheet" href="基本UI组件/展开说明.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 16px 24px; max-width: 1280px; margin: 0 auto; }
+
+h1 { text-align: center; font-size: 24px; margin-bottom: 6px; }
+h1 .stroked-text { font-weight: 700; }
+.subtitle { text-align: center; color: var(--muted); font-size: 12px; margin-bottom: 20px; }
+
+.配置栏 { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.配置栏-行 { display: flex; align-items: center; gap: 8px; }
+.配置栏-btn { border: 1px solid var(--line); background: var(--panel); color: #e6b422; font-size: 13px; font-weight: 700; padding: 5px 16px; border-radius: 4px; cursor: pointer; height: 30px; line-height: 1; flex-shrink: 0; }
+.配置栏-btn:hover { border-color: #e6b422; background: rgba(230,180,34,0.08); }
+.配置栏-btn-sm { border: 1px solid var(--line); background: var(--panel); color: var(--muted); font-size: 11px; padding: 3px 10px; border-radius: 4px; cursor: pointer; height: 30px; line-height: 1; flex-shrink: 0; }
+.配置栏-btn-sm:hover { border-color: var(--text); color: var(--text); }
+.配置栏-input { border: 1px solid var(--line); background: var(--panel); color: var(--text); font-size: 12px; padding: 5px 10px; border-radius: 4px; height: 30px; flex: 1; outline: none; min-width: 0; }
+.配置栏-input:focus { border-color: #e6b422; }
+
+.标签页栏 { display: flex; gap: 0; margin-bottom: 16px; border-bottom: 2px solid var(--line); }
+.标签页-btn { background: none; border: none; color: var(--muted); font-size: 14px; font-weight: 700; padding: 8px 20px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: color 0.15s, border-color 0.15s; }
+.标签页-btn:hover { color: var(--text); }
+.标签页-btn.活跃 { color: #e6b422; border-bottom-color: #e6b422; }
+.标签页-内容 { display: none; }
+.标签页-内容.活跃 { display: block; }
+
+.section-gap { margin-bottom: 16px; }
+
+.intro-body { font-size: 13px; color: var(--muted); line-height: 1.8; padding: 12px; }
+.intro-body strong { color: var(--text); }
+
+.kw-item { margin-bottom: 12px; }
+.kw-item:last-child { margin-bottom: 0; }
+.kw-name { font-size: 16px; font-weight: bold; color: #00e5ff; margin-bottom: 3px; }
+.kw-def { font-size: 12px; color: var(--text); line-height: 1.7; }
+.kw-def strong { color: #e6b422; }
+
+.计算网格 { display: flex; flex-direction: column; gap: 16px; }
+.参数行容器 { display: flex; gap: 0; align-items: stretch; margin-bottom: 0; border-bottom: 1px solid var(--line); }
+.参数行容器:last-child { border-bottom: none; }
+.参数左侧 { display: flex; align-items: center; gap: 8px; flex-shrink: 0; width: 490px; padding: 8px 12px; }
+.参数标签 { font-size: 16px; color: #00e5ff; font-weight: 700; flex-shrink: 0; width: 140px; }
+.参数右侧 { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.参数值 { font-size: 18px; font-weight: 700; color: #00e5ff; width: 68px; text-align: right; flex-shrink: 0; }
+.参数单位 { font-size: 18px; color: #1de9b6; width: 140px; text-align: left; white-space: nowrap; flex-shrink: 0; }
+.参数描述 { font-size: 13px; color: var(--text); line-height: 1.6; flex: 1; padding: 8px 12px 8px 16px; border-left: 1px solid var(--line); overflow-wrap: break-word; word-break: break-word; }
+.参数分割线 { border: none; margin: 12px 0 0 0; }
+.结果分割线 { border: none; margin: 12px 0 0 0; }
+.结果行容器 { display: flex; gap: 0; align-items: stretch; border-bottom: 1px solid var(--line); }
+.结果行容器:last-child { border-bottom: none; }
+.结果左侧 { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; width: 490px; padding: 8px 12px; }
+.结果标签 { font-size: 16px; color: #00e5ff; font-weight: 700; text-align: center; width: 100%; margin-bottom: 2px; }
+.结果算式 { font-size: 14px; color: #4caf50; font-weight: 700; text-align: center; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.结果算式 .结果值 { font-size: 18px; }
+.结果算式 .结果单位 { color: #1de9b6; font-size: 18px; }
+.结果公式 { font-size: 12px; color: var(--muted); text-align: center; word-break: break-all; }
+.结果公式 .kw { color: #e6b422; font-weight: 600; }
+.结果公式 .sym { color: #e6b422; font-weight: 600; }
+.结果公式 .frac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 3px; line-height: 1.3; }
+.结果公式 .frac-num { padding: 0 4px 1px; border-bottom: 1px solid var(--muted); }
+.结果公式 .frac-den { padding: 1px 4px 0; }
+.RMT三栏 { display: flex; gap: 12px; align-items: stretch; }
+.RMT栏 { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.RMT栏头 { font-size: 16px; font-weight: 700; text-align: center; padding: 10px 8px; border-bottom: 2px solid var(--line); }
+.RMT对比表 { width: 100%; border-collapse: collapse; flex: 1; }
+.RMT对比表 td { font-size: 13px; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.RMT对比表 .rmt指标 { color: #00e5ff; font-weight: 700; text-align: left; white-space: nowrap; }
+.RMT对比表 .rmt值 { font-size: 16px; font-weight: 700; color: #4caf50; text-align: right; }
+.RMT对比表 .rmt描述 { font-size: 11px; color: var(--muted); line-height: 1.4; }
+.RMT对比表 .rmt公式 { font-size: 11px; color: #90caf9; font-style: italic; line-height: 1.4; }
+.RMT对比表 .rmt算式 { font-size: 11px; color: var(--muted); padding-top: 2px; }
+.RMT对比表 .rmt值行 td { border-bottom: none; }
+.RMT对比表 .rmt算式行 td { border-top: none; padding-top: 0; }
+.RMT对比表 .rmt倍数 { font-size: 12px; font-weight: 700; color: #e6b422; text-align: right; }
+.结果描述 { font-size: 13px; color: var(--text); line-height: 1.6; flex: 1; padding: 8px 12px; border-left: 1px solid var(--line); overflow-wrap: break-word; word-break: break-word; }
+
+.顶部栏 { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.访问计数器 { font-size: 11px; color: var(--muted); }
+.访问计数器 span { color: #e6b422; font-weight: 700; font-size: 13px; }
+.语言切换 { display: flex; gap: 4px; }
+.语言切换 button { border: 1px solid var(--line); background: var(--panel); color: var(--muted); font-size: 11px; padding: 3px 10px; border-radius: 4px; cursor: pointer; height: 26px; line-height: 1; }
+.语言切换 button:hover { border-color: var(--text); color: var(--text); }
+.语言切换 button.active { border-color: #e6b422; color: #e6b422; background: rgba(230,180,34,0.08); }
+
+.舆论攻防区 { display: flex; flex-direction: column; gap: 16px; }
+.舆论导语 { font-size: 15px; color: var(--text); line-height: 1.8; padding: 12px; background: var(--panel); border-radius: 6px; border-left: 3px solid #e6b422; }
+.舆论导语 strong { color: #e6b422; }
+.舆论分类 { margin-bottom: 0; }
+.舆论分类头 { display: flex; align-items: baseline; gap: 10px; padding: 10px 12px; background: var(--panel); border-radius: 6px 6px 0 0; border-bottom: 2px solid var(--line); }
+.舆论分类名 { font-size: 18px; font-weight: 700; color: #00e5ff; }
+.舆论分类描述 { font-size: 14px; color: var(--muted); line-height: 1.5; }
+.舆论表 { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.舆论表 th { font-size: 15px; font-weight: 700; color: #ff5252; padding: 8px 10px; border-bottom: 2px solid var(--line); text-align: left; background: var(--panel); }
+.舆论表 th:nth-child(1) { width: 18%; }
+.舆论表 th:nth-child(2) { width: 82%; }
+.舆论表 td { font-size: 15px; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; line-height: 1.6; }
+.舆论表 tr:last-child td { border-bottom: none; }
+.舆论类型 { color: #00e5ff; font-weight: 700; white-space: nowrap; }
+.舆论详解 { color: var(--text); line-height: 1.7; }
+</style>
+</head>
+<body>
+
+<div class="顶部栏">
+  <div class="访问计数器">👁 页面访问量：<span id="visitCount">...</span> 次</div>
+  <div class="语言切换">
+    <button id="langZh" class="active">中</button>
+    <button id="langEn">EN</button>
+  </div>
+</div>
+
+<h1 id="mainTitle"></h1>
+<div class="subtitle" id="subtitleText"></div>
+
+<div id="configBar" class="section-gap"></div>
+
+<div id="introArea" class="section-gap"></div>
+<div id="keywordsArea" class="section-gap"></div>
+<div id="calcArea" class="section-gap"></div>
+
+<script src="基本UI组件/颜色系统.js"></script>
+<script src="基本UI组件/文本系统.js"></script>
+<script src="基本UI组件/滚动条.js"></script>
+<script src="基本UI组件/面板.js"></script>
+<script src="基本UI组件/可折叠面板.js"></script>
+<script src="基本UI组件/数字输入框.js"></script>
+<script src="基本UI组件/标签.js"></script>
+<script src="基本UI组件/分割线.js"></script>
+<script src="基本UI组件/工具提示.js"></script>
+<script src="基本UI组件/展开说明.js"></script>
+
+<script>
+var L = localStorage.getItem('poe2calc-lang') || 'zh';
+var T = {
+  zh: {
+    title: '⚔ 流放之路2 组队收益倍增计算器',
+    subtitle: '投产比分析 · 差异倍数表 · 盈亏平衡天数',
+    visitLabel: '👁 页面访问量：',
+    visitUnit: '次',
+    tabSolo: '单人单刷',
+    tabParty: '多人组队',
+    tabMulti: '单人多开',
+    tabRmt: 'RMT专区',
+    tabRhetoric: '舆论攻防',
+    rhetoricIntro: '<span style="color:#69f0ae">此专区专门为聪明睿智且懂数学的我的观众朋友们讲解为什么舆论攻击是一种极其适合低道德者且充满恶意的方式。</span><br><span style="color:#ff5252">并给不懂数学且作恶多端的割韭菜拉黑一条龙的宰猪匠讲解，为什么他这么蠢且坏，为什么他一定要捂住粉丝不让他们开智！因为他真的利益相关！真的挡他财路！</span><br><strong style="font-size:17px">以上言论不包含人身攻击，仅从理性角度分析并批判某种客观存在的现象，切勿对号入座。</strong>',
+    rhetoricCatLogic: '逻辑谬误陷阱',
+    rhetoricCatLogicDesc: '用来让荒谬的指控看起来"合理"，伪装得很有逻辑，目的是绕过你的理性防御。',
+    rhetoricCatIdentity: '身份摧毁与动机质疑',
+    rhetoricCatIdentityDesc: '当对方在事实上无法驳倒你时，就会转向攻击你的人格、身份和动机。',
+    rhetoricCatEmotion: '情感操控与道德绑架',
+    rhetoricCatEmotionDesc: '最隐蔽的攻击，专攻人性中柔软的部分，让你自我怀疑。',
+    rhetoricCatInfo: '信息污染与混淆视听',
+    rhetoricCatInfoDesc: '不追求逻辑取胜，只追求把水搅浑，让你精疲力竭。',
+      rhetoricCatAgenda: '话语权操控与议程控制',
+      rhetoricCatAgendaDesc: '控制"讨论什么"比"怎么讨论"更致命，谁掌握了话语权，谁就掌握了真相的定义权。',
+    rhetoricColType: '谬误概述',
+    rhetoricColDetail: '详细解释',
+    exportBtn: '导出配置',
+    copyBtn: '复制',
+    importBtn: '导入配置',
+    pasteBtn: '粘贴',
+    exportPlaceholder: '点击「导出配置」生成密钥串',
+    importPlaceholder: '粘贴密钥后点击「导入配置」',
+    introHead: '项目简介',
+    introBody: '本计算器用于对比<strong>单人单刷</strong>、<strong>多人组队</strong>与<strong>单人多开</strong>三种模式的投产比差异，量化组队带来的收益倍增效果。',
+    introBilibili: '作者B站：<a href="https://space.bilibili.com/8089909" target="_blank" style="color:#e6b422;">sdjybn</a> 欢迎关注～',
+    kwDivider: '关键词介绍',
+    kwGroupFinance: '金融关键词',
+    kwRoi: '投产比',
+    kwRoiDef: '总产出 ÷ 总投入。衡量<strong>每投入1单位成本能获得多少产出</strong>，是比值形式。投产比 > 1 说明有盈余，= 1 不赚不亏，< 1 亏损。',
+    kwPayback: '盈亏平衡天数',
+    kwPaybackDef: '准备阶段耗时折算天数 + 固定成本 ÷ 每日利润。即<strong>从零开始到累计净收益为零所需的总天数</strong>，包含准备期时间成本和运营期成本回收，天数越短越好。',
+    kwGroupPoe: '流放之路关键词',
+    kwBuildCost: '角色造价成本',
+    kwBuildCostDef: '将一个角色培养到可以执行对应策略的<strong>通货成本</strong>。',
+    kwBuildTime: '角色养成耗时',
+    kwBuildTimeDef: '将一个角色培养到可以执行对应策略的<strong>时间成本</strong>。',
+    kwAtlasCost: '异界开拓成本',
+    kwAtlasCostDef: '将异界天赋或者无锁神庙等策略的前期<strong>一次性的通货消耗</strong>的概称。与门票成本不同的是此类均为一次性投入，后续无需每次策略投入成本。',
+    kwAtlasTime: '异界开拓耗时',
+    kwAtlasTimeDef: '将异界天赋或者无锁神庙等策略的前期<strong>一次性的时间消耗</strong>的概称。与门票耗时不同的是此类均为一次性投入，后续无需每次策略投入成本。',
+    kwTicketCost: '单张门票成本',
+    kwTicketCostDef: '在流放之路中供一个或多个角色进行生产工作的<strong>消耗品成本的通货消耗量</strong>的概称。包括不限于"石碑""引路石""BOSS门票""神庙搭建成本"及同类消耗品。',
+    kwTicketTime: '单张门票耗时',
+    kwTicketTimeDef: '制作或者购买门票消耗的时间，此门票耗时与策略相对应，刷图则计算做图跑图耗时，神庙则计算搭建神庙耗时。',
+    kwStratIncome: '单次策略收益',
+    kwStratIncomeDef: '消耗门票成本可带来的收益均值。',
+    kwStratTime: '单次策略耗时',
+    kwStratTimeDef: '完成一次策略消耗的时间，也就是结算一次策略收益的时间，可以通俗理解为刷一张图或者打完一场神庙的耗时。',
+    kwDropPool: '掉落池',
+    kwDropPoolDef: '一种非公开的游戏机制，限制惊喜掉落和稀有物品掉落的硬性掉落池。全服共享，总量固定，先到先得。组队单位时间抽奖次数远超单人，抢占掉落池份额，获得额外收益。',
+    kwDivine: '神圣石',
+    kwDivineDef: '一种被广泛认可的<strong>一般等价物</strong>，代指投入或产出的价值。',
+    kwGroupRmt: 'RMT关键词',
+    kwRmtName: 'RMT',
+    kwRmtDef: 'Real Money Trading，用现实货币买卖游戏内虚拟资产的行为。本计算器RMT专区将游戏内神圣石收益转换为现实货币估算，帮助衡量实际经济收益。',
+    kwDecay: '汇率日衰减系数',
+    kwDecayDef: '每天汇率乘以此系数。<strong>=1表示不贬值</strong>；<1表示逐日贬值。第N天汇率 = 初始汇率 × 衰减系数^(N-1)。本系数直接影响RMT收益曲线走势。',
+    kwRate: '神圣石赛季初始汇率',
+    kwRateDef: '赛季第1天1神圣石兑换现实货币的价格。此汇率作为RMT收益计算的基准，后续天数汇率按衰减系数逐日递减。',
+    kwCurrentDay: '当前赛季天数',
+    kwCurrentDayDef: '设定当前为赛季第几天，影响RMT收益计算使用的汇率。第N天汇率 = 初始汇率 × 衰减系数^(N-1)。',
+    kwGroupCalc: '本计算器关键词',
+    kwDailyPlaytime: '拟每日游玩时长',
+    kwDailyPlaytimeDef: '此数值默认为8小时，用于<strong>控制变量</strong>方便量化计算各类情况的投产比。',
+    kwSoloMode: '单人单刷模式',
+    kwSoloModeDef: '一人开一个号，最为基础的算法系数源头。',
+    kwPartyMode: '多人组队模式',
+    kwPartyModeDef: '多人，每人一号，产出均分，成本平坦，计算此场景下均分得到的收益相比单人单刷的比例。',
+    kwMultiMode: '单人多开模式',
+    kwMultiModeDef: '一人开多个号组一个队伍，产出全吃，成本自付，计算此场景下的投产比与单人单刷的比例。',
+    kwRatio: '均分产出相对占比',
+    kwRatioDef: '组队每次策略人均分到的收益，相对于单人单次策略收益的倍率百分比。<br>计算方式：组队单次策略人均收益 ÷ 单人单次策略收益 × 100%。<br>=100%意味着组队每次策略人均收益与单人相同；>200%意味着组队每次策略人均收益是单人的2倍。<br>这是本计算器最核心的变量——它综合了组队爆率加成、掉落分配等一切因素，是一个<strong>经验参数，由用户根据实际情况填写</strong>。',
+    kwDropPoolCoeff: '掉落池系数',
+    kwDropPoolCoeffDef: '量化组队因抢占掉落池份额而获得的额外收益倍率。均分产出相对占比越高，单位时间抽奖次数越多，抢占掉落池份额越多，额外收益越大。<br>=1表示不考虑掉落池抢占的额外收益；>1表示组队因掉落池抢占获得额外收益。单人模式为基准，不需要此系数。',
+    soloPanelHead: '单人单刷参数',
+    soloResultHead: '单人单刷计算结果',
+    fldBuildCost: '角色造价成本',
+    fldBuildCostDesc: '将一个角色培养到可以执行对应策略的通货成本。',
+    fldBuildTime: '角色养成耗时',
+    fldBuildTimeDesc: '将一个角色培养到可以执行对应策略的时间成本。',
+    fldAtlasCost: '异界开拓成本',
+    fldAtlasCostDesc: '将异界天赋或者无锁神庙等策略的前期一次性的通货消耗的概称。与门票成本不同的是此类均为一次性投入，后续无需每次策略投入成本。',
+    fldAtlasTime: '异界开拓耗时',
+    fldAtlasTimeDesc: '将异界天赋或者无锁神庙等策略的前期一次性的时间消耗的概称。与门票耗时不同的是此类均为一次性投入，后续无需每次策略投入成本。',
+    fldTicketCost: '单张门票成本',
+    fldTicketCostDesc: '消耗品成本的通货消耗量概称，包括石碑、引路石、BOSS门票等。',
+    fldTicketTime: '单张门票耗时',
+    fldTicketTimeDesc: '制作或购买门票消耗的时间，与策略相对应。',
+    fldStratIncome: '单次策略收益',
+    fldStratIncomeDesc: '消耗门票成本可带来的收益均值。',
+    fldStratTime: '单次策略耗时',
+    fldStratTimeDesc: '完成一次策略消耗的时间，即结算一次策略收益的时间。',
+    fldDailyMinutes: '拟每日游玩时长',
+    fldDailyMinutesDesc: '用于控制变量，方便量化计算各类情况的投产比。',
+    fldSeasonDays: '拟每赛季游玩日',
+    fldSeasonDaysDesc: '一个赛季中计划游玩的天数。',
+    unitDivine: '神圣石',
+    unitMin: '分钟',
+    unitDay: '天',
+    unitPerson: '人',
+    unitTimes: '次',
+    unitPercent: '%',
+    unitYuan: '元',
+    unitMultiplier: '倍',
+    resDailyCycles: '(单人)拟每日策略总次数',
+    resDailyCyclesDesc: '在给定每日游玩时长下，完成门票制作与策略执行这一完整循环的次数。反映每日可执行的策略轮数。',
+    resDailyInput: '(单人)拟每日投入量',
+    resDailyInputDesc: '每日在门票消耗上的总投入量。',
+    resDailyOutput: '(单人)拟每日产出量',
+    resDailyOutputDesc: '每日通过策略执行获得的总产出量。',
+    resDailyProfit: '(单人)拟每日利润量',
+    resDailyProfitDesc: '每日产出减去每日投入后的净利润量。',
+    resDailyRoi: '(单人)拟每日投产比',
+    resDailyRoiDesc: '每日产出与每日投入的比值，反映每日循环的投入产出效率。',
+    resPaybackDays: '(单人)拟盈亏平衡天数',
+    resPaybackDaysDesc: '准备阶段耗时折算天数与固定成本回收天数之和。从零开始到累计净收益为零所需的总天数，此前为亏损期，此后为纯利润期。',
+    resHourlyProfit: '(单人)每小时净利润',
+    resHourlyProfitDesc: '每游戏小时的平均净利润，用于跨策略横向对比效率。',
+    resSeasonProfit: '(单人)拟赛季总收益',
+    resSeasonProfitDesc: '扣除角色养成耗时与异界开拓耗时后的有效天数内，按每日利润估算的总收益。',
+    resSeasonNet: '(单人)拟赛季总利润',
+    resSeasonNetDesc: '扣除养成与开拓耗时后的有效天数，再减去一次性造价与开拓成本，得到的赛季净利润。',
+    teamPanelHead: '多人组队参数',
+    teamResultHead: '组队计算结果',
+    multiPanelHead: '单人多开参数',
+    multiResultHead: '单人多开计算结果',
+    fldTeamCount: '队伍角色数',
+    fldTeamCountDesc: '队伍中同时参与的角色总数，直接影响下方三个成本系数。',
+    fldCostCoeff: '角色造价成本系数',
+    fldCostCoeffDesc: '组队状态下养成一个可以执行策略的角色的成本相对单人的占比。案例：在六人组队环境下，只需要六分之一的成本即可实现一个角色的打造。六个角色事实上只需要消耗相当于一个角色的资源投入。',
+    fldAtlasCoeff: '异界开拓成本系数',
+    fldAtlasCoeffDesc: '组队状态下每个角色分摊的异界开拓成本相对单人的占比。案例：在六人组队环境下，队伍只需投入一份异界开拓成本，每个角色分摊六分之一。',
+    fldTicketCoeff: '单张门票成本系数',
+    fldTicketCoeffDesc: '组队状态下每个角色分摊的单张门票成本相对单人的占比。案例：在六人组队环境下，队伍只需投入一份门票，每个角色分摊六分之一。',
+    fldTicketTimeCoeff: '单张门票耗时系数',
+    fldTicketTimeCoeffDesc: '乘以单人单刷中「单张门票耗时」的倍数。默认=1，用于模拟组队快速做图效率。不随队伍角色数自动变化。',
+    fldStratTimeCoeff: '单次策略耗时系数',
+    fldStratTimeCoeffDesc: '乘以单人单刷中「单次策略耗时」的倍数。默认=1，用于模拟组队快速刷图效率。不随队伍角色数自动变化。',
+    fldRatio: '均分产出相对占比',
+    fldRatioDesc: '<span style=\'color:#ff4444;font-weight:700\'>（线性收益，计算每个角色的均收益）</span>组队每次策略人均收益 ÷ 单人单次策略收益 × 100%。=100%意味着组队每次策略人均收益与单人相同；>200%意味着组队每次策略人均收益是单人的2倍。',
+    fldDropPoolCoeff: '掉落池系数',
+    fldDropPoolCoeffDesc: '<span style=\'color:#ff4444;font-weight:700\'>（零和博弈，与单人单刷抢占掉落池）</span>均分产出相对占比越高，单位时间抽奖次数越多，抢占掉落池份额越多，组队额外收益越大。=1表示不考虑掉落池抢占的额外收益；>1表示组队因掉落池抢占获得额外收益。',
+    rmtPanelHead: 'RMT参数',
+    rmtResultHead: 'RMT对比结果',
+    rmtChartHead: '赛季RMT收益走势',
+    rmtNetChartHead: '赛季纯RMT利润走势',
+    fldRate: '神圣石赛季初始汇率',
+    fldRateDesc: '赛季第1天1神圣石兑换现实货币的价格。',
+    fldDecay: '汇率日衰减系数',
+    fldDecayDesc: '每天汇率乘以此系数。=1表示不贬值；<1表示逐日贬值。第N天汇率 = 初始汇率 × 衰减系数^(N-1)。',
+    fldCurrentDay: '当前赛季天数',
+    fldCurrentDayDesc: '设定当前为赛季第几天，影响RMT收益计算使用的汇率。',
+    fmtHour: '小时',
+    copyOk: '已复制',
+    alertBadKey: '密钥格式错误，无法导入。',
+    errNoBalance: '无法盈亏平衡'
+  },
+  en: {
+    title: '⚔ Path of Exile 2 - Party Profit Multiplier Calculator',
+    subtitle: 'ROI Analysis · Multiplier Table · Break-even Days',
+    visitLabel: '👁 Page Views: ',
+    visitUnit: '',
+    tabSolo: 'Solo',
+    tabParty: 'Party',
+    tabMulti: 'Multi-Box',
+    tabRmt: 'RMT',
+    tabRhetoric: 'Rhetoric Defense',
+    rhetoricIntro: '<span style="color:#69f0ae">This section is dedicated to explaining to my smart, math-literate audience why rhetorical attacks are a method extremely suited for the morally bankrupt and full of malice.</span><br><span style="color:#ff5252">And to explain to the math-illiterate, evil-doing, scam-and-block one-stop pig-butchering artisan why they are so stupid and evil, and why they must cover their fans\' eyes from enlightenment! Because they have a real vested interest! It really threatens their revenue!</span><br><strong style="font-size:17px">The above statements do not constitute personal attacks. They merely analyze and critique an objectively existing phenomenon from a rational perspective. Do not take them personally.</strong>',
+    rhetoricCatLogic: 'Logical Fallacy Traps',
+    rhetoricCatLogicDesc: 'Making absurd accusations appear "reasonable" — disguised as logical arguments designed to bypass your rational defenses.',
+    rhetoricCatIdentity: 'Identity Destruction & Motive Questioning',
+    rhetoricCatIdentityDesc: 'When opponents can\'t refute you on facts, they attack your character, identity, and motives instead.',
+    rhetoricCatEmotion: 'Emotional Manipulation & Moral Blackmail',
+    rhetoricCatEmotionDesc: 'The most insidious attacks, targeting the softer parts of human nature to make you doubt yourself.',
+    rhetoricCatInfo: 'Information Pollution & Obfuscation',
+    rhetoricCatInfoDesc: 'Not seeking to win logically — just muddying the waters until you\'re exhausted.',
+      rhetoricCatAgenda: 'Discourse Control & Agenda Setting',
+      rhetoricCatAgendaDesc: 'Controlling "what to discuss" is more lethal than "how to discuss" — whoever controls discourse controls the definition of truth.',
+    rhetoricColType: 'Fallacy Overview',
+    rhetoricColDetail: 'Detailed Explanation',
+    exportBtn: 'Export Config',
+    copyBtn: 'Copy',
+    importBtn: 'Import Config',
+    pasteBtn: 'Paste',
+    exportPlaceholder: 'Click Export Config to generate key',
+    importPlaceholder: 'Paste key then click Import Config',
+    introHead: 'About',
+    introBody: 'This calculator compares <strong>Solo</strong>, <strong>Party</strong> and <strong>Multi-Box</strong> Return-On-Investment, quantifying the profit multiplier from grouping.',
+    introBilibili: 'Author: <a href="https://space.bilibili.com/8089909" target="_blank" style="color:#e6b422;">sdjybn @ Bilibili</a>',
+    kwDivider: 'Key Terms',
+    kwGroupFinance: 'Finance Terms',
+    kwRoi: 'ROI (Return on Investment)',
+    kwRoiDef: 'Total Output ÷ Total Input. Measures <strong>how much output per 1 unit of input cost</strong>, as a ratio. ROI > 1 means profit, = 1 break-even, < 1 loss.',
+    kwPayback: 'Break-even Days',
+    kwPaybackDef: 'Prep time converted to days + Fixed Cost ÷ Daily Profit. The <strong>total days from scratch until cumulative net profit reaches zero</strong>, including prep time and operational cost recovery. Fewer days is better.',
+    kwGroupPoe: 'Path of Exile Terms',
+    kwBuildCost: 'Character Build Cost',
+    kwBuildCostDef: 'The <strong>currency cost</strong> to build a character capable of executing the strategy.',
+    kwBuildTime: 'Character Build Time',
+    kwBuildTimeDef: 'The <strong>time cost</strong> to build a character capable of executing the strategy.',
+    kwAtlasCost: 'Atlas Setup Cost',
+    kwAtlasCostDef: 'A general term for <strong>one-time currency expenditure</strong> to set up Atlas passives, Temples, etc. Unlike ticket cost, this is a one-time investment that does not recur per strategy execution.',
+    kwAtlasTime: 'Atlas Setup Time',
+    kwAtlasTimeDef: 'A general term for <strong>one-time time expenditure</strong> to set up Atlas passives, Temples, etc. Unlike ticket time, this is a one-time investment.',
+    kwTicketCost: 'Per-Map Ticket Cost',
+    kwTicketCostDef: 'A general term for <strong>consumable currency cost</strong> for one or more characters to perform productive work. Includes Tablets, Waystones, Boss Fragments, Temple setup costs, etc.',
+    kwTicketTime: 'Per-Map Ticket Time',
+    kwTicketTimeDef: 'Time spent crafting or purchasing tickets. Corresponds to the strategy: mapping calculates map rolling time, Temples calculate setup time.',
+    kwStratIncome: 'Per-Run Strategy Income',
+    kwStratIncomeDef: 'Average revenue from consuming one ticket.',
+    kwStratTime: 'Per-Run Strategy Time',
+    kwStratTimeDef: 'Time to complete one strategy run, i.e., time to settle one cycle of strategy revenue. Simply put, time to clear one map or finish one Temple.',
+    kwDropPool: 'Drop Pool',
+    kwDropPoolDef: 'An undisclosed game mechanic that limits surprise/rare item drops with a hard cap pool. Server-wide shared, fixed total, first-come-first-served. Parties generate far more pulls per unit time than solo, seizing more pool share for extra profit.',
+    kwDivine: 'Divine Orb',
+    kwDivineDef: 'A widely recognized <strong>general equivalent</strong>, representing the value of input or output.',
+    kwGroupRmt: 'RMT Terms',
+    kwRmtName: 'RMT (Real Money Trading)',
+    kwRmtDef: 'Real Money Trading — buying/selling in-game virtual assets with real currency. This calculator\'s RMT tab converts Divine Orb profits into real-world currency estimates to help measure actual economic returns.',
+    kwDecay: 'Daily Decay Coefficient',
+    kwDecayDef: 'Rate multiplied by this each day. <strong>=1 no depreciation</strong>; <1 depreciating daily. Day N rate = Initial Rate × Coeff^(N-1). This coefficient directly affects RMT profit curve trends.',
+    kwRate: 'Initial Divine Exchange Rate',
+    kwRateDef: 'Real currency price per Divine Orb on league Day 1. This rate serves as the baseline for RMT calculations; subsequent days decay according to the decay coefficient.',
+    kwCurrentDay: 'Current League Day',
+    kwCurrentDayDef: 'Sets the current league day, affecting the exchange rate used for RMT calculations. Day N rate = Initial Rate × Coeff^(N-1).',
+    kwGroupCalc: 'Calculator Terms',
+    kwDailyPlaytime: 'Simulated Daily Playtime',
+    kwDailyPlaytimeDef: 'Default 8 hours. Used as a <strong>control variable</strong> to facilitate quantified calculation of ROI across scenarios.',
+    kwSoloMode: 'Solo Mode',
+    kwSoloModeDef: 'One person, one account. The baseline algorithm coefficient source.',
+    kwPartyMode: 'Party Mode',
+    kwPartyModeDef: 'Multiple people, one account each, output shared equally, costs split equally. Calculates the ratio of shared profit vs solo.',
+    kwMultiMode: 'Multi-Box Mode',
+    kwMultiModeDef: 'One person running multiple accounts in a party. All output goes to one person, all costs self-paid. Calculates ROI ratio vs solo.',
+    kwRatio: 'Shared Output Relative Ratio',
+    kwRatioDef: 'Per-person party profit per run ÷ Solo profit per run × 100%. <br>=100% means party per-person profit equals solo; >200% means party per-person is 2× solo.<br>This is the core variable — it synthesizes party drop bonuses, loot distribution, and all other factors. An <strong>empirical parameter filled by the user based on actual conditions</strong>.',
+    kwDropPoolCoeff: 'Drop Pool Coefficient',
+    kwDropPoolCoeffDef: 'Quantifies extra profit from party seizing drop pool share. Higher shared output ratio and more pulls per unit time increase pool share.<br>=1 means no extra pool benefit; >1 means party gains extra profit from the pool. Solo is the baseline and does not need this coefficient.',
+    soloPanelHead: 'Solo Parameters',
+    soloResultHead: 'Solo Results',
+    fldBuildCost: 'Character Build Cost',
+    fldBuildCostDesc: 'Currency cost to build a character for the strategy.',
+    fldBuildTime: 'Character Build Time',
+    fldBuildTimeDesc: 'Time cost to build a character for the strategy.',
+    fldAtlasCost: 'Atlas Setup Cost',
+    fldAtlasCostDesc: 'One-time currency cost for Atlas/Temple setup. Unlike ticket cost, this is a one-time upfront investment.',
+    fldAtlasTime: 'Atlas Setup Time',
+    fldAtlasTimeDesc: 'One-time time cost for Atlas/Temple setup. Unlike ticket time, this is a one-time upfront investment.',
+    fldTicketCost: 'Per-Map Ticket Cost',
+    fldTicketCostDesc: 'Consumable currency cost, including Tablets, Waystones, Boss Fragments, etc.',
+    fldTicketTime: 'Per-Map Ticket Time',
+    fldTicketTimeDesc: 'Time spent crafting or purchasing tickets, strategy-dependent.',
+    fldStratIncome: 'Per-Run Strategy Income',
+    fldStratIncomeDesc: 'Average revenue from one ticket consumption.',
+    fldStratTime: 'Per-Run Strategy Time',
+    fldStratTimeDesc: 'Time to complete one strategy cycle, i.e., time to settle one run\'s profit.',
+    fldDailyMinutes: 'Simulated Daily Playtime',
+    fldDailyMinutesDesc: 'Control variable for quantifying ROI across scenarios.',
+    fldSeasonDays: 'Simulated Days Per League',
+    fldSeasonDaysDesc: 'Number of days planned to play in one league.',
+    unitDivine: 'Div',
+    unitMin: 'min',
+    unitDay: 'days',
+    unitPerson: 'players',
+    unitTimes: 'runs',
+    unitPercent: '%',
+    unitYuan: '¥',
+    unitMultiplier: '×',
+    resDailyCycles: '(Solo) Daily Strategy Runs',
+    resDailyCyclesDesc: 'Number of complete ticket+strategy cycles per day given playtime. Reflects daily run count.',
+    resDailyInput: '(Solo) Daily Input',
+    resDailyInputDesc: 'Total daily ticket expenditure.',
+    resDailyOutput: '(Solo) Daily Output',
+    resDailyOutputDesc: 'Total daily output from strategy execution.',
+    resDailyProfit: '(Solo) Daily Profit',
+    resDailyProfitDesc: 'Daily net profit after deducting input from output.',
+    resDailyRoi: '(Solo) Daily ROI',
+    resDailyRoiDesc: 'Ratio of daily output to daily input, reflecting input-output efficiency.',
+    resPaybackDays: '(Solo) Break-even Days',
+    resPaybackDaysDesc: 'Sum of prep time days and fixed cost recovery days. Total days from scratch until cumulative net profit reaches zero. Loss period before, pure profit after.',
+    resHourlyProfit: '(Solo) Hourly Profit',
+    resHourlyProfitDesc: 'Average net profit per game hour, for cross-strategy efficiency comparison.',
+    resSeasonProfit: '(Solo) Season Total Revenue',
+    resSeasonProfitDesc: 'Estimated total revenue over effective days (excluding prep time), based on daily profit.',
+    resSeasonNet: '(Solo) Season Net Profit',
+    resSeasonNetDesc: 'Season total revenue minus one-time build and atlas costs, yielding season net profit.',
+    teamPanelHead: 'Party Parameters',
+    teamResultHead: 'Party Results',
+    multiPanelHead: 'Multi-Box Parameters',
+    multiResultHead: 'Multi-Box Results',
+    fldTeamCount: 'Party Size',
+    fldTeamCountDesc: 'Total characters in the party. Directly affects the three cost coefficients below.',
+    fldCostCoeff: 'Build Cost Coefficient',
+    fldCostCoeffDesc: 'Per-character build cost as a fraction of solo. Example: 6-player party, each character only needs 1/6 of a solo build cost.',
+    fldAtlasCoeff: 'Atlas Cost Coefficient',
+    fldAtlasCoeffDesc: 'Per-character atlas cost as a fraction of solo. Example: 6-player party, one atlas investment split 6 ways.',
+    fldTicketCoeff: 'Ticket Cost Coefficient',
+    fldTicketCoeffDesc: 'Per-character ticket cost as a fraction of solo. Example: 6-player party, one ticket split 6 ways.',
+    fldTicketTimeCoeff: 'Ticket Time Coefficient',
+    fldTicketTimeCoeffDesc: 'Multiplier on Solo ticket time. Default=1. Simulates party map-rolling efficiency. Does not auto-change with party size.',
+    fldStratTimeCoeff: 'Strategy Time Coefficient',
+    fldStratTimeCoeffDesc: 'Multiplier on Solo strategy time. Default=1. Simulates party clear speed. Does not auto-change with party size.',
+    fldRatio: 'Shared Output Ratio',
+    fldRatioDesc: '<span style=\'color:#ff4444;font-weight:700\'>(Linear benefit, per-character share)</span> Party per-person profit per run ÷ Solo profit per run × 100%. =100% means party= solo; >200% means party= 2× solo.',
+    fldDropPoolCoeff: 'Drop Pool Coefficient',
+    fldDropPoolCoeffDesc: '<span style=\'color:#ff4444;font-weight:700\'>(Zero-sum, competes with solo for pool)</span> Higher ratio + more pulls = more pool share. =1 means no pool benefit; >1 means pool extra profit.',
+    rmtPanelHead: 'RMT Parameters',
+    rmtResultHead: 'RMT Comparison',
+    rmtChartHead: 'Season RMT Revenue Trend',
+    rmtNetChartHead: 'Season Net RMT Profit Trend',
+    fldRate: 'Initial Divine Exchange Rate',
+    fldRateDesc: 'Real currency price per Divine Orb on league Day 1.',
+    fldDecay: 'Daily Decay Coefficient',
+    fldDecayDesc: 'Rate multiplied by this each day. =1 no depreciation; <1 depreciating daily. Day N rate = Initial × Coeff^(N-1).',
+    fldCurrentDay: 'Current League Day',
+    fldCurrentDayDesc: 'Sets the current league day, affecting the exchange rate used for RMT calculations.',
+    fmtHour: 'hrs',
+    copyOk: 'Copied',
+    alertBadKey: 'Invalid key format, unable to import.',
+    errNoBalance: 'Cannot break even'
+  }
+};
+function t(key) { return (T[L] && T[L][key]) || (T['zh'][key]) || key; }
+function setLang(lang) { L = lang; localStorage.setItem('poe2calc-lang', lang); renderAll(); }
+
+var allInputs;
+var soloInputs;
+
+injectColorCSSVars();
+
+function initTitle() {
+  const h1 = document.getElementById("mainTitle");
+  h1.textContent = t('title');
+  h1.style.color = getColorHex("yellow", 500);
+  h1.style.fontSize = "24px";
+  h1.style.fontWeight = "700";
+  document.getElementById("subtitleText").textContent = t('subtitle');
+}
+
+function initIntro() {
+  const area = document.getElementById("introArea");
+  area.innerHTML = '';
+  const panel = createPanel({ size: "md", head: t('introHead') });
+  panel.content.innerHTML = '<div class="intro-body">' + t('introBody') + '</div><div class="intro-body" style="padding-top:4px;">' + t('introBilibili') + '</div>';
+  area.appendChild(panel.el);
+}
+
+function initKeywords() {
+  const area = document.getElementById("keywordsArea");
+  area.innerHTML = '';
+
+  const divider = createDivider({ text: t('kwDivider') });
+  const dividerText = divider.querySelector(".divider-text");
+  dividerText.style.color = getColorHex("yellow", 500);
+  dividerText.style.fontSize = "20px";
+  dividerText.style.fontWeight = "700";
+  area.appendChild(divider);
+
+  const kwData = [
+    {
+      label: t('kwGroupFinance'), badge: "2", color: "blue", level: 400,
+      items: [
+        { name: t('kwRoi'), def: t('kwRoiDef') },
+        { name: t('kwPayback'), def: t('kwPaybackDef') }
+      ]
+    },
+    {
+      label: t('kwGroupPoe'), badge: "10", color: "orange", level: 400,
+      items: [
+        { name: t('kwBuildCost'), def: t('kwBuildCostDef') },
+        { name: t('kwBuildTime'), def: t('kwBuildTimeDef') },
+        { name: t('kwAtlasCost'), def: t('kwAtlasCostDef') },
+        { name: t('kwAtlasTime'), def: t('kwAtlasTimeDef') },
+        { name: t('kwTicketCost'), def: t('kwTicketCostDef') },
+        { name: t('kwTicketTime'), def: t('kwTicketTimeDef') },
+        { name: t('kwStratIncome'), def: t('kwStratIncomeDef') },
+        { name: t('kwStratTime'), def: t('kwStratTimeDef') },
+        { name: t('kwDropPool'), def: t('kwDropPoolDef') },
+        { name: t('kwDivine'), def: t('kwDivineDef') }
+      ]
+    },
+    {
+      label: t('kwGroupRmt'), badge: "4", color: "purple", level: 400,
+      items: [
+        { name: t('kwRmtName'), def: t('kwRmtDef') },
+        { name: t('kwRate'), def: t('kwRateDef') },
+        { name: t('kwDecay'), def: t('kwDecayDef') },
+        { name: t('kwCurrentDay'), def: t('kwCurrentDayDef') }
+      ]
+    },
+    {
+      label: t('kwGroupCalc'), badge: "6", color: "cyan", level: 400,
+      items: [
+        { name: t('kwDailyPlaytime'), def: t('kwDailyPlaytimeDef') },
+        { name: t('kwSoloMode'), def: t('kwSoloModeDef') },
+        { name: t('kwPartyMode'), def: t('kwPartyModeDef') },
+        { name: t('kwMultiMode'), def: t('kwMultiModeDef') },
+        { name: t('kwRatio'), def: t('kwRatioDef') },
+        { name: t('kwDropPoolCoeff'), def: t('kwDropPoolCoeffDef') }
+      ]
+    }
+  ];
+
+  kwData.forEach(function(group) {
+    const col = createCollapsible({ label: group.label, badge: group.badge, size: "md", open: false });
+    const trigger = col.wrap.querySelector(".collapsible-label");
+    if (group.label === t('kwGroupFinance')) {
+      trigger.style.color = getColorHex("blue", 400);
+      trigger.style.fontSize = "18px";
+      trigger.style.fontWeight = "700";
+    } else {
+      trigger.style.color = getColorHex(group.color, group.level);
+      trigger.style.fontSize = "18px";
+      trigger.style.fontWeight = "700";
+    }
+
+    group.items.forEach(function(item) {
+      const div = document.createElement("div");
+      div.className = "kw-item";
+      const nameEl = document.createElement("div");
+      nameEl.className = "kw-name";
+      nameEl.textContent = item.name;
+      nameEl.style.color = getColorHex("cyan", 500);
+      nameEl.style.fontSize = "16px";
+      nameEl.style.fontWeight = "700";
+      const defEl = document.createElement("div");
+      defEl.className = "kw-def";
+      defEl.innerHTML = item.def;
+      div.appendChild(nameEl);
+      div.appendChild(defEl);
+      col.content.appendChild(div);
+    });
+
+    area.appendChild(col.wrap);
+  });
+}
+
+var configBar = (function initConfigBar() {
+  var bar = document.getElementById("configBar");
+  bar.innerHTML = '';
+
+  var row1 = document.createElement("div");
+  row1.className = "配置栏-行";
+  var exportBtn = document.createElement("button");
+  exportBtn.className = "配置栏-btn";
+  exportBtn.textContent = t('exportBtn');
+  var copyBtn = document.createElement("button");
+  copyBtn.className = "配置栏-btn-sm";
+  copyBtn.textContent = t('copyBtn');
+  var exportInput = document.createElement("input");
+  exportInput.className = "配置栏-input";
+  exportInput.type = "text";
+  exportInput.readOnly = true;
+  exportInput.placeholder = t('exportPlaceholder');
+  row1.appendChild(exportBtn);
+  row1.appendChild(copyBtn);
+  row1.appendChild(exportInput);
+
+  var row2 = document.createElement("div");
+  row2.className = "配置栏-行";
+  var importBtn = document.createElement("button");
+  importBtn.className = "配置栏-btn";
+  importBtn.textContent = t('importBtn');
+  var pasteBtn = document.createElement("button");
+  pasteBtn.className = "配置栏-btn-sm";
+  pasteBtn.textContent = t('pasteBtn');
+  var importInput = document.createElement("input");
+  importInput.className = "配置栏-input";
+  importInput.type = "text";
+  importInput.placeholder = t('importPlaceholder');
+  row2.appendChild(importBtn);
+  row2.appendChild(pasteBtn);
+  row2.appendChild(importInput);
+
+  bar.appendChild(row1);
+  bar.appendChild(row2);
+  return { exportBtn: exportBtn, importBtn: importBtn, copyBtn: copyBtn, pasteBtn: pasteBtn, exportInput: exportInput, importInput: importInput };
+})();
+
+function initCalcArea() {
+  var soloValues = null;
+  var partyValues = null;
+  var multiValues = null;
+  var teamRecalcFn = null;
+  var multiRecalcFn = null;
+  var rmtRecalcFn = null;
+  allInputs = {};
+  soloInputs = {};
+
+  var area = document.getElementById("calcArea");
+  area.innerHTML = '';
+
+  var tabBar = document.createElement("div");
+  tabBar.className = "标签页栏";
+  var tabDefs = [
+    { label: t('tabSolo'), tabId: "tab-solo" },
+    { label: t('tabParty'), tabId: "tab-party" },
+    { label: t('tabMulti'), tabId: "tab-multi" },
+    { label: t('tabRmt'), tabId: "tab-rmt" },
+    { label: t('tabRhetoric'), tabId: "tab-rhetoric" }
+  ];
+  var tabs = {};
+  tabDefs.forEach(function(def) {
+    var btn = document.createElement("button");
+    btn.className = "标签页-btn";
+    btn.textContent = def.label;
+    btn.addEventListener("click", function() { switchTab(def.tabId); });
+    tabBar.appendChild(btn);
+    tabs[def.tabId] = btn;
+  });
+  area.appendChild(tabBar);
+
+  function switchTab(tabId) {
+    Object.keys(tabs).forEach(function(k) {
+      tabs[k].classList.toggle("活跃", k === tabId);
+      tabPanels[k].classList.toggle("活跃", k === tabId);
+    });
+    if (tabId === "tab-party" && teamRecalcFn) teamRecalcFn();
+    if (tabId === "tab-multi" && multiRecalcFn) multiRecalcFn();
+    if (tabId === "tab-rmt") {
+      if (teamRecalcFn) teamRecalcFn();
+      if (multiRecalcFn) multiRecalcFn();
+      if (rmtRecalcFn) rmtRecalcFn();
+    }
+  }
+
+  var tabPanels = {};
+  tabDefs.forEach(function(def) {
+    var panel = document.createElement("div");
+    panel.className = "标签页-内容";
+    panel.setAttribute("data-tab", def.tabId);
+    area.appendChild(panel);
+    tabPanels[def.tabId] = panel;
+  });
+
+  function buildFieldRow(label, unit, value, step, min, max, desc, onChange, opts) {
+    opts = opts || {};
+    var autoHour = opts.autoHour || false;
+    var onChanges = onChange ? [onChange] : [];
+
+    var container = document.createElement("div");
+    container.className = "参数行容器";
+    var left = document.createElement("div");
+    left.className = "参数左侧";
+    var labelEl = document.createElement("span");
+    labelEl.className = "参数标签";
+    labelEl.textContent = label;
+    var right = document.createElement("span");
+    right.className = "参数右侧";
+    var valEl = document.createElement("span");
+    valEl.className = "参数值";
+    valEl.textContent = value;
+    var unitEl = document.createElement("span");
+    unitEl.className = "参数单位";
+    unitEl.textContent = autoHour ? unit + " ≈ " + (value / 60).toFixed(1) + t('fmtHour') : unit;
+    var input = createNumberInput({
+      size: "md",
+      value: value,
+      step: step,
+      min: min,
+      max: max,
+      stepMin: opts.stepMin != null ? opts.stepMin : (step < 1 ? 0.01 : 0.1),
+      stepMax: opts.stepMax != null ? opts.stepMax : (step < 1 ? 1 : 100),
+      onChange: function(v) {
+        valEl.textContent = v;
+        if (autoHour) unitEl.textContent = unit + " ≈ " + (v / 60).toFixed(1) + t('fmtHour');
+        onChanges.forEach(function(fn) { fn(v); });
+      }
+    });
+    right.appendChild(input);
+    right.appendChild(valEl);
+    right.appendChild(unitEl);
+    left.appendChild(labelEl);
+    left.appendChild(right);
+    container.appendChild(left);
+    if (desc) {
+      var descEl = document.createElement("div");
+      descEl.className = "参数描述";
+      descEl.innerHTML = desc;
+      container.appendChild(descEl);
+    }
+    return { el: container, input: input, addOnChange: function(fn) { onChanges.push(fn); } };
+  }
+
+  function buildResultRow(item, highlightFn) {
+    var container = document.createElement("div");
+    container.className = "结果行容器";
+    var left = document.createElement("div");
+    left.className = "结果左侧";
+
+    var label = document.createElement("div");
+    label.className = "结果标签";
+    label.textContent = item.label;
+    left.appendChild(label);
+
+    var expr = document.createElement("div");
+    expr.id = item.id || "";
+    expr.className = "结果算式";
+    expr.textContent = "—";
+    left.appendChild(expr);
+
+    container.appendChild(left);
+    if (item.desc) {
+      var descEl = document.createElement("div");
+      descEl.className = "结果描述";
+      descEl.textContent = item.desc;
+      if (item.formula) {
+        var formulaEl = document.createElement("div");
+        formulaEl.className = "结果公式";
+        formulaEl.innerHTML = formatFormula(item.formula);
+        descEl.appendChild(formulaEl);
+      }
+      container.appendChild(descEl);
+    } else if (item.formula) {
+      var formulaEl = document.createElement("div");
+      formulaEl.className = "结果公式";
+      formulaEl.innerHTML = formatFormula(item.formula);
+      container.appendChild(formulaEl);
+    }
+    return { el: container, exprEl: expr };
+  }
+
+  var 关键词列表 = [
+    "拟每日游玩时长", "单张门票耗时", "单次策略耗时",
+    "单张门票成本", "单次策略收益",
+    "拟每日策略总次数", "拟每日投入量", "拟每日产出量", "拟每日利润量", "拟每日投产比",
+    "拟盈亏平衡天数", "角色造价成本", "异界开拓成本", "角色养成耗时", "异界开拓耗时",
+    "拟赛季总收益", "拟每赛季游玩日", "拟赛季总利润",
+    "每小时净利润",
+    "单张门票耗时系数", "单次策略耗时系数", "单张门票成本系数",
+    "角色造价成本系数", "异界开拓成本系数", "均分产出相对占比", "掉落池系数",
+    "组队每日策略总次数", "组队每日投入量", "组队每日产出量", "组队每日利润量", "组队每日投产比",
+    "组队盈亏平衡天数", "组队赛季总收益", "组队赛季总利润", "组队每小时净利润",
+    "多开每日策略总次数", "多开每日投入量", "多开每日产出量", "多开每日利润量", "多开每日投产比",
+    "多开盈亏平衡天数", "多开赛季总收益", "多开赛季总利润", "多开每小时净利润",
+    "单刷每日利润量", "单刷盈亏平衡天数", "单刷赛季总利润", "单刷每小时净利润",
+    "队伍角色数",
+    "神圣石赛季初始汇率", "汇率日衰减系数", "当前赛季天数",
+    "拟每小时通货收益", "拟每小时RMT收益", "拟每日RMT收益", "拟赛季总RMT收益", "拟赛季纯RMT利润"
+  ];
+
+  function 高亮关键词(文本) {
+    var 排序列表 = 关键词列表.slice().sort(function(a, b) { return b.length - a.length; });
+    var pattern = 排序列表.join("|");
+    var re = new RegExp(pattern, "g");
+    return 文本.replace(re, function(m) { return '<span class="kw">' + m + '</span>'; });
+  }
+
+  function formatFormula(文本) {
+    var highlighted = 高亮关键词(文本);
+    return highlighted.replace(/\{([^|]*)\|([^}]*)\}/g, function(match, num, den) {
+      return '<span class="frac"><span class="frac-num">' + num + '</span><span class="frac-den">' + den + '</span></span>';
+    });
+  }
+
+  var soloFields = [
+    { key: "角色造价成本", label: t('fldBuildCost'), unit: t('unitDivine'), value: 100, step: 10, min: 0, max: 999999, desc: t('fldBuildCostDesc') },
+    { key: "角色养成耗时", label: t('fldBuildTime'), unit: t('unitMin'), value: 480, step: 10, min: 0, max: 999999, desc: t('fldBuildTimeDesc'), 分割: true },
+    { key: "异界开拓成本", label: t('fldAtlasCost'), unit: t('unitDivine'), value: 30, step: 10, min: 0, max: 999999, desc: t('fldAtlasCostDesc'), 分割: true },
+    { key: "异界开拓耗时", label: t('fldAtlasTime'), unit: t('unitMin'), value: 240, step: 10, min: 0, max: 999999, desc: t('fldAtlasTimeDesc') },
+    { key: "单张门票成本", label: t('fldTicketCost'), unit: t('unitDivine'), value: 1, step: 1, min: 0, max: 99999, desc: t('fldTicketCostDesc'), 分割: true },
+    { key: "单张门票耗时", label: t('fldTicketTime'), unit: t('unitMin'), value: 1, step: 1, min: 0, max: 1440, desc: t('fldTicketTimeDesc') },
+    { key: "单次策略收益", label: t('fldStratIncome'), unit: t('unitDivine'), value: 1.5, step: 1, min: 0, max: 99999, desc: t('fldStratIncomeDesc'), 分割: true },
+    { key: "单次策略耗时", label: t('fldStratTime'), unit: t('unitMin'), value: 3, step: 1, min: 0, max: 1440, desc: t('fldStratTimeDesc') },
+    { key: "拟每日游玩时长", label: t('fldDailyMinutes'), unit: t('unitMin'), value: 480, step: 30, min: 1, max: 1440, desc: t('fldDailyMinutesDesc'), 分割: true },
+    { key: "拟每赛季游玩日", label: t('fldSeasonDays'), unit: t('unitDay'), value: 90, step: 1, min: 1, max: 365, desc: t('fldSeasonDaysDesc') }
+  ];
+
+  var soloPanel = createPanel({ size: "md", head: t('soloPanelHead') });
+  var soloHead = soloPanel.el.querySelector(".panel-head");
+  soloHead.style.color = getColorHex("blue", 400);
+  soloHead.style.fontSize = "18px";
+  soloHead.style.fontWeight = "700";
+
+  soloFields.forEach(function(f) {
+    if (f.分割) {
+      var hr = document.createElement("hr");
+      hr.className = "参数分割线";
+      soloPanel.content.appendChild(hr);
+    }
+    var row = buildFieldRow(f.label, f.unit, f.value, f.step, f.min, f.max, f.desc, recalc, {
+      autoHour: f.unit === t('unitMin'),
+      stepMin: 0.01,
+      stepMax: 1000
+    });
+    soloInputs[f.key] = row.input;
+    allInputs[f.key] = row.input;
+    soloPanel.content.appendChild(row.el);
+  });
+
+  var resultPanel = createPanel({ size: "md", head: t('soloResultHead') });
+  var resultHead = resultPanel.el.querySelector(".panel-head");
+  resultHead.style.color = getColorHex("orange", 400);
+  resultHead.style.fontSize = "18px";
+  resultHead.style.fontWeight = "700";
+
+  var resultItems = [
+    {
+      label: t('resDailyCycles'), id: "res_dailyCycles", unit: t('unitTimes'),
+      formula: "{拟每日游玩时长|单张门票耗时 + 单次策略耗时}",
+      desc: t('resDailyCyclesDesc')
+    },
+    {
+      label: t('resDailyInput'), id: "res_dailyInput", unit: t('unitDivine'),
+      formula: "拟每日策略总次数 × 单张门票成本",
+      desc: t('resDailyInputDesc'),
+      分割: true
+    },
+    {
+      label: t('resDailyOutput'), id: "res_dailyOutput", unit: t('unitDivine'),
+      formula: "拟每日策略总次数 × 单次策略收益",
+      desc: t('resDailyOutputDesc'),
+      分割: true
+    },
+    {
+      label: t('resDailyProfit'), id: "res_dailyProfit", unit: t('unitDivine'),
+      formula: "拟每日产出量 − 拟每日投入量",
+      desc: t('resDailyProfitDesc'),
+      分割: true
+    },
+    {
+      label: t('resDailyRoi'), id: "res_dailyRoi", unit: "",
+      formula: "{拟每日产出量|拟每日投入量}",
+      desc: t('resDailyRoiDesc'),
+      分割: true
+    },
+    {
+      label: t('resPaybackDays'), id: "res_paybackDays", unit: t('unitDay'),
+      formula: "{角色养成耗时 + 异界开拓耗时|拟每日游玩时长} + {角色造价成本 + 异界开拓成本|拟每日利润量}",
+      desc: t('resPaybackDaysDesc')
+    },
+    {
+      label: t('resHourlyProfit'), id: "res_hourlyProfit", unit: t('unitDivine'),
+      formula: "{拟每日利润量|拟每日游玩时长 ÷ 60}",
+      desc: t('resHourlyProfitDesc'),
+      分割: true
+    },
+    {
+      label: t('resSeasonProfit'), id: "res_seasonProfit", unit: t('unitDivine'),
+      formula: "拟每日利润量 × (拟每赛季游玩日 − {角色养成耗时 + 异界开拓耗时|拟每日游玩时长})",
+      desc: t('resSeasonProfitDesc'),
+      分割: true
+    },
+    {
+      label: t('resSeasonNet'), id: "res_seasonNet", unit: t('unitDivine'),
+      formula: "拟每日利润量 × (拟每赛季游玩日 − {角色养成耗时 + 异界开拓耗时|拟每日游玩时长}) − 角色造价成本 − 异界开拓成本",
+      desc: t('resSeasonNetDesc')
+    }
+  ];
+
+  var resultEls = {};
+
+  resultItems.forEach(function(item) {
+    if (item.分割) {
+      var hr = document.createElement("hr");
+      hr.className = "结果分割线";
+      resultPanel.content.appendChild(hr);
+    }
+    var row = buildResultRow(item, 高亮关键词);
+    resultEls[item.id] = row.exprEl;
+    resultPanel.content.appendChild(row.el);
+  });
+
+  function recalc() {
+    var ticketCost = soloInputs["单张门票成本"].getValue();
+    var ticketTime = soloInputs["单张门票耗时"].getValue();
+    var stratIncome = soloInputs["单次策略收益"].getValue();
+    var stratTime = soloInputs["单次策略耗时"].getValue();
+    var dailyMinutes = soloInputs["拟每日游玩时长"].getValue();
+    var buildCost = soloInputs["角色造价成本"].getValue();
+    var atlasCost = soloInputs["异界开拓成本"].getValue();
+    var seasonDays = soloInputs["拟每赛季游玩日"].getValue();
+
+    var cycleTime = ticketTime + stratTime;
+    var dailyCycles = cycleTime > 0 ? dailyMinutes / cycleTime : 0;
+    var dailyInput = dailyCycles * ticketCost;
+    var dailyOutput = dailyCycles * stratIncome;
+    var dailyProfit = dailyOutput - dailyInput;
+    var dailyRoi = dailyInput > 0 ? dailyOutput / dailyInput : 0;
+    var totalFixedCost = buildCost + atlasCost;
+    var buildTime = soloInputs["角色养成耗时"].getValue();
+    var atlasTime = soloInputs["异界开拓耗时"].getValue();
+    var prepTotalMinutes = buildTime + atlasTime;
+    var prepDays = dailyMinutes > 0 ? prepTotalMinutes / dailyMinutes : 0;
+    var paybackDays = dailyProfit > 0 ? prepDays + totalFixedCost / dailyProfit : Infinity;
+    var effectiveDays = Math.max(0, seasonDays - prepDays);
+    var seasonProfit = dailyProfit * effectiveDays;
+    var seasonNet = seasonProfit - totalFixedCost;
+    var hourlyProfit = dailyMinutes > 0 ? dailyProfit / (dailyMinutes / 60) : 0;
+
+    if (dailyCycles > 0) {
+      resultEls["res_dailyCycles"].innerHTML = dailyMinutes + " ÷ (" + ticketTime + " + " + stratTime + ")  =  <span class='结果值'>" + dailyCycles.toFixed(1) + "</span><span class='结果单位'> " + t('unitTimes') + "</span>";
+    } else {
+      resultEls["res_dailyCycles"].textContent = "—";
+    }
+
+    if (dailyCycles > 0) {
+      resultEls["res_dailyInput"].innerHTML = dailyCycles.toFixed(1) + " × " + ticketCost + "  =  <span class='结果值'>" + dailyInput.toFixed(1) + "</span><span class='结果单位'> " + t('unitDivine') + "</span>";
+    } else {
+      resultEls["res_dailyInput"].textContent = "—";
+    }
+
+    if (dailyCycles > 0) {
+      resultEls["res_dailyOutput"].innerHTML = dailyCycles.toFixed(1) + " × " + stratIncome + "  =  <span class='结果值'>" + dailyOutput.toFixed(1) + "</span><span class='结果单位'> " + t('unitDivine') + "</span>";
+    } else {
+      resultEls["res_dailyOutput"].textContent = "—";
+    }
+
+    if (dailyCycles > 0) {
+      resultEls["res_dailyProfit"].innerHTML = dailyOutput.toFixed(1) + " - " + dailyInput.toFixed(1) + "  =  <span class='结果值'>" + dailyProfit.toFixed(1) + "</span><span class='结果单位'> " + t('unitDivine') + "</span>";
+    } else {
+      resultEls["res_dailyProfit"].textContent = "—";
+    }
+
+    if (dailyRoi > 0) {
+      resultEls["res_dailyRoi"].innerHTML = dailyOutput.toFixed(1) + " ÷ " + dailyInput.toFixed(1) + "  =  <span class='结果值'>1:" + dailyRoi.toFixed(2) + "</span>";
+    } else {
+      resultEls["res_dailyRoi"].textContent = "—";
+    }
+
+    if (isFinite(paybackDays) && paybackDays > 0) {
+      resultEls["res_paybackDays"].innerHTML = prepDays.toFixed(1) + " + (" + buildCost + " + " + atlasCost + ") ÷ " + dailyProfit.toFixed(1) + "  =  <span class='结果值'>" + paybackDays.toFixed(1) + "</span><span class='结果单位'> " + t('unitDay') + "</span>";
+    } else {
+      resultEls["res_paybackDays"].textContent = t('errNoBalance');
+    }
+
+    if (dailyCycles > 0) {
+      resultEls["res_hourlyProfit"].innerHTML = dailyProfit.toFixed(1) + " ÷ (" + dailyMinutes.toFixed(0) + " ÷ 60)  =  <span class='结果值'>" + hourlyProfit.toFixed(1) + "</span><span class='结果单位'> " + t('unitDivine') + "</span>";
+    } else {
+      resultEls["res_hourlyProfit"].textContent = "—";
+    }
+
+    if (dailyCycles > 0 && seasonDays > 0) {
+      resultEls["res_seasonProfit"].innerHTML = dailyProfit.toFixed(1) + " × (" + seasonDays + " - " + prepTotalMinutes.toFixed(0) + " ÷ " + dailyMinutes.toFixed(0) + ")  =  <span class='结果值'>" + seasonProfit.toFixed(1) + "</span><span class='结果单位'> " + t('unitDivine') + "</span>";
+    } else {
+      resultEls["res_seasonProfit"].textContent = "—";
+    }
+
+    if (dailyCycles > 0 && seasonDays > 0) {
+      resultEls["res_seasonNet"].innerHTML = seasonProfit.toFixed(1) + " - " + totalFixedCost.toFixed(1) + "  =  <span class='结果值'>" + seasonNet.toFixed(1) + "</span><span class='结果单位'> " + t('unitDivine') + "</span>";
+    } else {
+      resultEls["res_seasonNet"].textContent = "—";
+    }
+
+    soloValues = {
+      ticketCost: ticketCost, ticketTime: ticketTime,
+      stratIncome: stratIncome, stratTime: stratTime,
+      buildCost: buildCost, buildTime: buildTime,
+      atlasCost: atlasCost, atlasTime: atlasTime,
+      dailyMinutes: dailyMinutes, seasonDays: seasonDays,
+      dailyCycles: dailyCycles, dailyInput: dailyInput,
+      dailyOutput: dailyOutput, dailyProfit: dailyProfit,
+      dailyRoi: dailyRoi, totalFixedCost: totalFixedCost,
+      prepTotalMinutes: prepTotalMinutes, prepDays: prepDays,
+      paybackDays: paybackDays, effectiveDays: effectiveDays,
+      seasonProfit: seasonProfit, seasonNet: seasonNet,
+      hourlyProfit: hourlyProfit
+    };
+  }
+
+  var paramKeys = [
+    "角色造价成本", "角色养成耗时", "异界开拓成本", "异界开拓耗时",
+    "单张门票成本", "单张门票耗时", "单次策略收益", "单次策略耗时",
+    "拟每日游玩时长", "拟每赛季游玩日"
+  ];
+
+  var teamParamKeys = [
+    "队伍角色数", "角色造价成本系数", "异界开拓成本系数", "单张门票成本系数",
+    "单张门票耗时系数", "单次策略耗时系数", "均分产出相对占比", "掉落池系数"
+  ];
+
+  var rmtParamKeys = [
+    "神圣石汇率", "汇率衰减系数", "当前赛季天数"
+  ];
+
+  var allParamKeys = paramKeys.concat(teamParamKeys, rmtParamKeys);
+
+  function copyToClipboard(text) {
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.left = "-9999px";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+
+  function exportConfig() {
+    var values = allParamKeys.map(function(k) {
+      var inp = allInputs[k];
+      return inp ? inp.getValue() : 0;
+    });
+    var raw = values.join(",");
+    var key = btoa(raw);
+    configBar.exportInput.value = key;
+    try {
+      navigator.clipboard.writeText(key).catch(function() { copyToClipboard(key); });
+    } catch (e) {
+      copyToClipboard(key);
+    }
+  }
+
+  function importConfig() {
+    var key = configBar.importInput.value.trim();
+    if (!key) return;
+    try {
+      var raw = atob(key);
+      var values = raw.split(",");
+      if (values.length < paramKeys.length) {
+        paramKeys.forEach(function(k, i) {
+          if (values[i] !== undefined && allInputs[k]) {
+            allInputs[k].setValue(parseFloat(values[i]));
+          }
+        });
+      } else {
+        allParamKeys.forEach(function(k, i) {
+          if (values[i] !== undefined && allInputs[k]) {
+            allInputs[k].setValue(parseFloat(values[i]));
+          }
+        });
+      }
+      recalc();
+      if (teamRecalcFn) teamRecalcFn();
+      if (multiRecalcFn) multiRecalcFn();
+      if (rmtRecalcFn) rmtRecalcFn();
+    } catch (e) {
+      alert(t('alertBadKey'));
+    }
+  }
+
+  if (!configBar._evtReady) {
+    configBar._evtReady = true;
+    configBar.copyBtn.addEventListener("click", function() {
+      var v = configBar.exportInput.value.trim();
+      if (!v) return;
+      try {
+        navigator.clipboard.writeText(v).catch(function() { copyToClipboard(v); });
+      } catch (e) {
+        copyToClipboard(v);
+      }
+    });
+
+    configBar.pasteBtn.addEventListener("click", function() {
+      navigator.clipboard.readText().then(function(t) {
+        if (t) configBar.importInput.value = t;
+      });
+    });
+
+    configBar.exportBtn.addEventListener("click", function() { exportConfig(); });
+    configBar.importBtn.addEventListener("click", function() { importConfig(); });
+  }
+
+  soloPanel.content.style.overflow = "hidden";
+  soloPanel.content.style.overflowY = "auto";
+
+  var grid = document.createElement("div");
+  grid.className = "计算网格";
+  grid.appendChild(soloPanel.el);
+  grid.appendChild(resultPanel.el);
+  tabPanels["tab-solo"].appendChild(grid);
+
+  function buildTeamParams(mode) {
+    var teamCount = 6;
+    var perChar = Math.round((1 / teamCount) * 10000) / 10000;
+
+    var teamRow = buildFieldRow(t('fldTeamCount'), t('unitPerson'), teamCount, 1, 1, 100,
+      t('fldTeamCountDesc'),
+      function(v) { updateTeamCoeffs(v); }
+    );
+    var costRow = buildFieldRow(t('fldCostCoeff'), t('unitMultiplier'), perChar, 0.01, 0, 999,
+      t('fldCostCoeffDesc')
+    );
+    var atlasRow = buildFieldRow(t('fldAtlasCoeff'), t('unitMultiplier'), perChar, 0.01, 0, 999,
+      t('fldAtlasCoeffDesc')
+    );
+    var ticketRow = buildFieldRow(t('fldTicketCoeff'), t('unitMultiplier'), perChar, 0.01, 0, 999,
+      t('fldTicketCoeffDesc')
+    );
+    var ticketTimeRow = buildFieldRow(t('fldTicketTimeCoeff'), t('unitMultiplier'), 1, 0.01, 0, 999,
+      t('fldTicketTimeCoeffDesc')
+    );
+    var stratTimeRow = buildFieldRow(t('fldStratTimeCoeff'), t('unitMultiplier'), 1, 0.01, 0, 999,
+      t('fldStratTimeCoeffDesc')
+    );
+    var ratioRow = buildFieldRow(t('fldRatio'), t('unitPercent'), 100, 5, 0, 9999,
+      t('fldRatioDesc')
+    );
+    var dropPoolRow = buildFieldRow(t('fldDropPoolCoeff'), t('unitMultiplier'), 1, 0.01, 1, 999,
+      t('fldDropPoolCoeffDesc')
+    );
+
+    var costInput = costRow.input;
+    var atlasInput = atlasRow.input;
+    var ticketInput = ticketRow.input;
+
+    return {
+      teamInput: teamRow.input,
+      costInput: costInput,
+      atlasInput: atlasInput,
+      ticketInput: ticketInput,
+      ratioInput: ratioRow.input,
+      dropPoolInput: dropPoolRow.input,
+      teamRow: teamRow,
+      costRow: costRow,
+      atlasRow: atlasRow,
+      ticketRow: ticketRow,
+      ticketTimeRow: ticketTimeRow,
+      stratTimeRow: stratTimeRow,
+      ratioRow: ratioRow,
+      dropPoolRow: dropPoolRow,
+      rows: [teamRow.el, costRow.el, atlasRow.el, ticketRow.el, ticketTimeRow.el, stratTimeRow.el, ratioRow.el, dropPoolRow.el]
+    };
+
+    function updateTeamCoeffs(n) {
+      var v = Math.round((1 / n) * 10000) / 10000;
+      costInput.setValue(v);
+      atlasInput.setValue(v);
+      ticketInput.setValue(v);
+    }
+  }
+
+  function buildTeamResultPanel(teamInputs, mode) {
+    var headText = mode === "multi" ? t('multiResultHead') : t('teamResultHead');
+    var headColor = mode === "multi" ? getColorHex("purple", 400) : getColorHex("orange", 400);
+    var panel = createPanel({ size: "md", head: headText });
+    var head = panel.el.querySelector(".panel-head");
+    head.style.color = headColor;
+    head.style.fontSize = "18px";
+    head.style.fontWeight = "700";
+
+    var prefix = mode === "multi" ? "多开" : "组队";
+
+    var dInput = mode === "multi" ? "多开模式下所有角色每日的门票总投入量。" : "组队分摊后每人每日在门票消耗上的总投入量。";
+    var dOutput = mode === "multi" ? "多开独吞模式下所有角色每日的总产出量。" : "组队均分后每人每日获得的总产出量。";
+    var dProfit = mode === "multi" ? "多开独吞每日净利润总量。" : "组队每人每日的净利润量。";
+    var dRoi = mode === "multi" ? "多开每日的投入产出效率比值。" : "组队每人每日的投入产出效率比值。";
+    var dPayback = mode === "multi" ? "多开模式下从零开始到全部角色累计净收益为零所需的总天数，包含准备期时间成本和运营期成本回收。" : "组队分摊后从零开始到每人累计净收益为零所需的总天数，包含准备期时间成本和运营期成本回收。";
+    var dHourly = mode === "multi" ? "多开每游戏小时的平均净利润，用于跨策略横向对比效率。" : "组队每人每游戏小时的平均净利润，用于跨策略横向对比效率。";
+    var dSeasonProfit = mode === "multi" ? "多开独吞扣除养成与开拓耗时后的有效天数内赛季总收益。" : "组队每人扣除养成与开拓耗时后的有效天数内总收益。";
+    var dSeasonNet = mode === "multi" ? "多开独吞扣除全部角色固定成本后的赛季净利润。" : "组队每人扣除分摊固定成本后的赛季净利润。";
+    var multTag = mode === "multi" ? " × 队伍角色数" : "";
+
+    var teamItems = [
+      {
+        label: "(" + prefix + ")拟每日策略总次数", id: "team_dailyCycles", unit: "次",
+        formula: "{拟每日游玩时长|单张门票耗时 × 单张门票耗时系数 + 单次策略耗时 × 单次策略耗时系数}",
+        desc: prefix + "效率下每日可执行的策略轮数。"
+      },
+      {
+        label: "(" + prefix + ")拟每日投入量", id: "team_dailyInput", unit: "神圣石",
+        formula: prefix + "每日策略总次数 × 单张门票成本 × 单张门票成本系数" + multTag,
+        desc: dInput,
+        分割: true
+      },
+      {
+        label: "(" + prefix + ")拟每日产出量", id: "team_dailyOutput", unit: "神圣石",
+        formula: prefix + "每日策略总次数 × 单次策略收益 × 均分产出相对占比 × 掉落池系数" + multTag,
+        desc: dOutput,
+        分割: true
+      },
+      {
+        label: "(" + prefix + ")拟每日利润量", id: "team_dailyProfit", unit: "神圣石",
+        formula: prefix + "每日产出量 − " + prefix + "每日投入量",
+        desc: dProfit,
+        分割: true
+      },
+      {
+        label: "(" + prefix + ")拟每日投产比", id: "team_dailyRoi", unit: "",
+        formula: "{" + prefix + "每日产出量|" + prefix + "每日投入量}",
+        desc: dRoi,
+        分割: true
+      },
+      {
+        label: "(" + prefix + ")拟盈亏平衡天数", id: "team_paybackDays", unit: "天",
+        formula: "{角色养成耗时 + 异界开拓耗时|拟每日游玩时长} + {(角色造价成本 × 角色造价成本系数 + 异界开拓成本 × 异界开拓成本系数)" + multTag + "|" + prefix + "每日利润量}",
+        desc: dPayback
+      },
+      {
+        label: "(" + prefix + ")每小时净利润", id: "team_hourlyProfit", unit: "神圣石",
+        formula: "{" + prefix + "每日利润量|拟每日游玩时长 ÷ 60}",
+        desc: dHourly,
+        分割: true
+      },
+      {
+        label: "(" + prefix + ")拟赛季总收益", id: "team_seasonProfit", unit: "神圣石",
+        formula: prefix + "每日利润量 × (拟每赛季游玩日 − {角色养成耗时 + 异界开拓耗时|拟每日游玩时长})",
+        desc: dSeasonProfit,
+        分割: true
+      },
+      {
+        label: "(" + prefix + ")拟赛季总利润", id: "team_seasonNet", unit: "神圣石",
+        formula: prefix + "赛季总收益 − (角色造价成本 × 角色造价成本系数 + 异界开拓成本 × 异界开拓成本系数)" + multTag,
+        desc: dSeasonNet
+      },
+      {
+        label: "每日利润差异倍数", id: "team_comp_dailyProfit", unit: "",
+        formula: "{" + prefix + "每日利润量|单刷每日利润量}",
+        desc: prefix + "与单人单刷的每日利润对比。>1说明" + prefix + "更赚，<1说明单刷更赚。",
+        分割: true
+      },
+      {
+        label: "盈亏平衡天数差", id: "team_comp_payback", unit: "天",
+        formula: prefix + "盈亏平衡天数 − 单刷盈亏平衡天数",
+        desc: prefix + "与单人单刷的盈亏平衡天数对比。负值表示" + prefix + "更快达到盈亏平衡，正值表示单刷更快。"
+      },
+      {
+        label: "赛季总利润差异倍数", id: "team_comp_seasonNet", unit: "",
+        formula: "{" + prefix + "赛季总利润|单刷赛季总利润}",
+        desc: prefix + "与单人单刷的赛季总利润对比。>1说明" + prefix + "更赚。"
+      },
+      {
+        label: "每小时净利润差异倍数", id: "team_comp_hourlyProfit", unit: "",
+        formula: "{" + prefix + "每小时净利润|单刷每小时净利润}",
+        desc: prefix + "与单人单刷的每小时净利润对比。>1说明" + prefix + "效率更高。"
+      }
+    ];
+
+    var resultEls = {};
+
+    teamItems.forEach(function(item) {
+      if (item.分割) {
+        var hr = document.createElement("hr");
+        hr.className = "结果分割线";
+        panel.content.appendChild(hr);
+      }
+      var row = buildResultRow(item, 高亮关键词);
+      resultEls[item.id] = row.exprEl;
+      panel.content.appendChild(row.el);
+    });
+
+    function recalcTeam() {
+      var sv = soloValues;
+      if (!sv) return;
+
+      var teamCount = teamInputs.teamInput.getValue();
+      var costCoeff = teamInputs.costInput.getValue();
+      var atlasCoeff = teamInputs.atlasInput.getValue();
+      var ticketCoeff = teamInputs.ticketInput.getValue();
+      var ticketTimeCoeff = teamInputs.ticketTimeRow.input.getValue();
+      var stratTimeCoeff = teamInputs.stratTimeRow.input.getValue();
+      var ratioPercent = teamInputs.ratioInput.getValue();
+      var dropPoolCoeff = teamInputs.dropPoolInput.getValue();
+
+      var m = (mode === "multi") ? teamCount : 1;
+      var teamCycleTime = sv.ticketTime * ticketTimeCoeff + sv.stratTime * stratTimeCoeff;
+      var teamDailyCycles = teamCycleTime > 0 ? sv.dailyMinutes / teamCycleTime : 0;
+      var teamDailyInput = teamDailyCycles * sv.ticketCost * ticketCoeff * m;
+      var teamDailyOutput = teamDailyCycles * sv.stratIncome * (ratioPercent / 100) * dropPoolCoeff * m;
+      var teamDailyProfit = teamDailyOutput - teamDailyInput;
+      var teamDailyRoi = teamDailyInput > 0 ? teamDailyOutput / teamDailyInput : 0;
+      var teamFixedCost = (sv.buildCost * costCoeff + sv.atlasCost * atlasCoeff) * m;
+      var teamPaybackDays = teamDailyProfit > 0 ? sv.prepDays + teamFixedCost / teamDailyProfit : Infinity;
+      var teamHourlyProfit = sv.dailyMinutes > 0 ? teamDailyProfit / (sv.dailyMinutes / 60) : 0;
+      var teamSeasonProfit = teamDailyProfit * sv.effectiveDays;
+      var teamSeasonNet = teamSeasonProfit - teamFixedCost;
+
+      if (mode === "multi") {
+        multiValues = {
+          dailyProfit: teamDailyProfit, hourlyProfit: teamHourlyProfit,
+          fixedCost: teamFixedCost, dailyCycles: teamDailyCycles,
+          dailyOutput: teamDailyOutput, dailyInput: teamDailyInput
+        };
+      } else {
+        partyValues = {
+          dailyProfit: teamDailyProfit, hourlyProfit: teamHourlyProfit,
+          fixedCost: teamFixedCost, dailyCycles: teamDailyCycles,
+          dailyOutput: teamDailyOutput, dailyInput: teamDailyInput
+        };
+      }
+
+      if (teamDailyCycles > 0) {
+        resultEls["team_dailyCycles"].innerHTML = sv.dailyMinutes.toFixed(0) + " ÷ (" + sv.ticketTime.toFixed(0) + " × " + ticketTimeCoeff + " + " + sv.stratTime.toFixed(0) + " × " + stratTimeCoeff + ")  =  <span class='结果值'>" + teamDailyCycles.toFixed(1) + "</span><span class='结果单位'> 次</span>";
+      } else {
+        resultEls["team_dailyCycles"].textContent = "—";
+      }
+
+      if (teamDailyCycles > 0) {
+        var inputExpr = teamDailyCycles.toFixed(1) + " × " + sv.ticketCost + " × " + ticketCoeff;
+        if (m > 1) inputExpr += " × " + m;
+        resultEls["team_dailyInput"].innerHTML = inputExpr + "  =  <span class='结果值'>" + teamDailyInput.toFixed(1) + "</span><span class='结果单位'> " + t('unitDivine') + "</span>";
+      } else {
+        resultEls["team_dailyInput"].textContent = "—";
+      }
+
+      if (teamDailyCycles > 0) {
+        var outputExpr = teamDailyCycles.toFixed(1) + " × " + sv.stratIncome + " × " + ratioPercent + "%" + " × " + dropPoolCoeff;
+        if (m > 1) outputExpr += " × " + m;
+        resultEls["team_dailyOutput"].innerHTML = outputExpr + "  =  <span class='结果值'>" + teamDailyOutput.toFixed(1) + "</span><span class='结果单位'> " + t('unitDivine') + "</span>";
+      } else {
+        resultEls["team_dailyOutput"].textContent = "—";
+      }
+
+      if (teamDailyCycles > 0) {
+        resultEls["team_dailyProfit"].innerHTML = teamDailyOutput.toFixed(1) + " - " + teamDailyInput.toFixed(1) + "  =  <span class='结果值'>" + teamDailyProfit.toFixed(1) + "</span><span class='结果单位'> " + t('unitDivine') + "</span>";
+      } else {
+        resultEls["team_dailyProfit"].textContent = "—";
+      }
+
+      if (teamDailyRoi > 0) {
+        resultEls["team_dailyRoi"].innerHTML = teamDailyOutput.toFixed(1) + " ÷ " + teamDailyInput.toFixed(1) + "  =  <span class='结果值'>1:" + teamDailyRoi.toFixed(2) + "</span>";
+      } else {
+        resultEls["team_dailyRoi"].textContent = "—";
+      }
+
+      if (isFinite(teamPaybackDays) && teamPaybackDays > 0) {
+        var paybackExpr = sv.prepDays.toFixed(1) + " + (" + (sv.buildCost * costCoeff).toFixed(1) + " + " + (sv.atlasCost * atlasCoeff).toFixed(1) + ")";
+        if (m > 1) paybackExpr += " × " + m;
+        paybackExpr += " ÷ " + teamDailyProfit.toFixed(1);
+        resultEls["team_paybackDays"].innerHTML = paybackExpr + "  =  <span class='结果值'>" + teamPaybackDays.toFixed(1) + "</span><span class='结果单位'> " + t('unitDay') + "</span>";
+      } else {
+        resultEls["team_paybackDays"].textContent = t('errNoBalance');
+      }
+
+      if (teamDailyCycles > 0) {
+        resultEls["team_hourlyProfit"].innerHTML = teamDailyProfit.toFixed(1) + " ÷ (" + sv.dailyMinutes.toFixed(0) + " ÷ 60)  =  <span class='结果值'>" + teamHourlyProfit.toFixed(1) + "</span><span class='结果单位'> 神圣石</span>";
+      } else {
+        resultEls["team_hourlyProfit"].textContent = "—";
+      }
+
+      if (teamDailyCycles > 0 && sv.seasonDays > 0) {
+        resultEls["team_seasonProfit"].innerHTML = teamDailyProfit.toFixed(1) + " × (" + sv.seasonDays + " - " + sv.prepTotalMinutes.toFixed(0) + " ÷ " + sv.dailyMinutes.toFixed(0) + ")  =  <span class='结果值'>" + teamSeasonProfit.toFixed(1) + "</span><span class='结果单位'> 神圣石</span>";
+      } else {
+        resultEls["team_seasonProfit"].textContent = "—";
+      }
+
+      if (teamDailyCycles > 0 && sv.seasonDays > 0) {
+        resultEls["team_seasonNet"].innerHTML = teamSeasonProfit.toFixed(1) + " - " + teamFixedCost.toFixed(1) + "  =  <span class='结果值'>" + teamSeasonNet.toFixed(1) + "</span><span class='结果单位'> 神圣石</span>";
+      } else {
+        resultEls["team_seasonNet"].textContent = "—";
+      }
+
+      if (sv.dailyProfit > 0 && teamDailyCycles > 0) {
+        resultEls["team_comp_dailyProfit"].innerHTML = teamDailyProfit.toFixed(1) + " ÷ " + sv.dailyProfit.toFixed(1) + "  =  <span class='结果值'>×" + (teamDailyProfit / sv.dailyProfit).toFixed(2) + "</span>";
+      } else {
+        resultEls["team_comp_dailyProfit"].textContent = "—";
+      }
+
+      if (isFinite(teamPaybackDays) && teamPaybackDays > 0 && isFinite(sv.paybackDays) && sv.paybackDays > 0) {
+        var diffPayback = teamPaybackDays - sv.paybackDays;
+        resultEls["team_comp_payback"].innerHTML = teamPaybackDays.toFixed(1) + " - " + sv.paybackDays.toFixed(1) + "  =  <span class='结果值'>" + (diffPayback >= 0 ? "+" : "") + diffPayback.toFixed(1) + "</span><span class='结果单位'> 天</span>";
+      } else {
+        resultEls["team_comp_payback"].textContent = "—";
+      }
+
+      if (sv.seasonNet > 0 && teamDailyCycles > 0) {
+        resultEls["team_comp_seasonNet"].innerHTML = teamSeasonNet.toFixed(1) + " ÷ " + sv.seasonNet.toFixed(1) + "  =  <span class='结果值'>×" + (teamSeasonNet / sv.seasonNet).toFixed(2) + "</span>";
+      } else {
+        resultEls["team_comp_seasonNet"].textContent = "—";
+      }
+
+      if (sv.hourlyProfit > 0 && teamDailyCycles > 0) {
+        resultEls["team_comp_hourlyProfit"].innerHTML = teamHourlyProfit.toFixed(1) + " ÷ " + sv.hourlyProfit.toFixed(1) + "  =  <span class='结果值'>×" + (teamHourlyProfit / sv.hourlyProfit).toFixed(2) + "</span>";
+      } else {
+        resultEls["team_comp_hourlyProfit"].textContent = "—";
+      }
+    }
+
+    return { panel: panel, recalc: recalcTeam };
+  }
+
+  (function buildPartyTab() {
+    var params = buildTeamParams("party");
+    var result = buildTeamResultPanel(params, "party");
+
+    var grid = document.createElement("div");
+    grid.className = "计算网格";
+
+    var paramPanel = createPanel({ size: "md", head: t('teamPanelHead') });
+    var h = paramPanel.el.querySelector(".panel-head");
+    h.style.color = getColorHex("orange", 400);
+    h.style.fontSize = "18px";
+    h.style.fontWeight = "700";
+    params.rows.forEach(function(r) { paramPanel.content.appendChild(r); });
+    paramPanel.content.style.overflow = "hidden";
+    paramPanel.content.style.overflowY = "auto";
+    grid.appendChild(paramPanel.el);
+    grid.appendChild(result.panel.el);
+    tabPanels["tab-party"].appendChild(grid);
+
+    params.teamRow.addOnChange(result.recalc);
+    params.costRow.addOnChange(result.recalc);
+    params.atlasRow.addOnChange(result.recalc);
+    params.ticketRow.addOnChange(result.recalc);
+    params.ticketTimeRow.addOnChange(result.recalc);
+    params.stratTimeRow.addOnChange(result.recalc);
+    params.ratioRow.addOnChange(result.recalc);
+    params.dropPoolRow.addOnChange(result.recalc);
+    teamRecalcFn = result.recalc;
+    result.recalc();
+
+    allInputs["队伍角色数"] = params.teamRow.input;
+    allInputs["角色造价成本系数"] = params.costRow.input;
+    allInputs["异界开拓成本系数"] = params.atlasRow.input;
+    allInputs["单张门票成本系数"] = params.ticketRow.input;
+    allInputs["单张门票耗时系数"] = params.ticketTimeRow.input;
+    allInputs["单次策略耗时系数"] = params.stratTimeRow.input;
+    allInputs["均分产出相对占比"] = params.ratioRow.input;
+    allInputs["掉落池系数"] = params.dropPoolRow.input;
+  })();
+
+  (function buildMultiTab() {
+    var params = buildTeamParams("multi");
+    var result = buildTeamResultPanel(params, "multi");
+
+    var grid = document.createElement("div");
+    grid.className = "计算网格";
+
+    var paramPanel = createPanel({ size: "md", head: t('multiPanelHead') });
+    var h = paramPanel.el.querySelector(".panel-head");
+    h.style.color = getColorHex("purple", 400);
+    h.style.fontSize = "18px";
+    h.style.fontWeight = "700";
+    params.rows.forEach(function(r) { paramPanel.content.appendChild(r); });
+    paramPanel.content.style.overflow = "hidden";
+    paramPanel.content.style.overflowY = "auto";
+    grid.appendChild(paramPanel.el);
+    grid.appendChild(result.panel.el);
+    tabPanels["tab-multi"].appendChild(grid);
+
+    params.teamRow.addOnChange(result.recalc);
+    params.costRow.addOnChange(result.recalc);
+    params.atlasRow.addOnChange(result.recalc);
+    params.ticketRow.addOnChange(result.recalc);
+    params.ticketTimeRow.addOnChange(result.recalc);
+    params.stratTimeRow.addOnChange(result.recalc);
+    params.ratioRow.addOnChange(result.recalc);
+    params.dropPoolRow.addOnChange(result.recalc);
+    multiRecalcFn = result.recalc;
+    result.recalc();
+  })();
+
+  (function buildRmtTab() {
+    var grid = document.createElement("div");
+    grid.className = "计算网格";
+
+    var paramPanel = createPanel({ size: "md", head: t('rmtPanelHead') });
+    var h = paramPanel.el.querySelector(".panel-head");
+    h.style.color = getColorHex("red", 400);
+    h.style.fontSize = "18px";
+    h.style.fontWeight = "700";
+
+    var rateRow = buildFieldRow(t('fldRate'), t('unitYuan'), 20, 0.01, 0, 9999,
+      t('fldRateDesc')
+    );
+    var decayRow = buildFieldRow(t('fldDecay'), "", 0.6, 0.001, 0, 1,
+      t('fldDecayDesc')
+    );
+    var currentDayRow = buildFieldRow(t('fldCurrentDay'), t('unitDay'), 1, 1, 1, 999,
+      t('fldCurrentDayDesc')
+    );
+
+    paramPanel.content.appendChild(rateRow.el);
+    paramPanel.content.appendChild(decayRow.el);
+    paramPanel.content.appendChild(currentDayRow.el);
+    grid.appendChild(paramPanel.el);
+
+    var resultPanel = createPanel({ size: "md", head: t('rmtResultHead') });
+    var rh = resultPanel.el.querySelector(".panel-head");
+    rh.style.color = getColorHex("red", 400);
+    rh.style.fontSize = "18px";
+    rh.style.fontWeight = "700";
+
+    var metricDefs = [
+      { key: "hourly", label: "拟每小时通货收益", desc: "扣除门票消耗后的每小时神圣石净收益", formula: "(日产出 - 日消耗) ÷ 日游戏时长" },
+      { key: "hourlyRmt", label: "拟每小时RMT收益", desc: "按当前天数汇率折算的每小时人民币收益", formula: "每小时通货收益 × 第N天汇率" },
+      { key: "dailyRmt", label: "拟每日RMT收益", desc: "按当前天数汇率折算的每日人民币收益", formula: "每日通货利润 × 第N天汇率" },
+      { key: "seasonRmt", label: "拟赛季总RMT收益", desc: "赛季有效期内逐日累加RMT（汇率逐日衰减，准备期无收益）", formula: "Σ(每日利润 × 初始汇率 × 衰减^(d-1)), d=准备期+1~赛季结束" },
+      { key: "seasonNetRmt", label: "拟赛季纯RMT利润", desc: "赛季总RMT收益扣除固定投入成本后的净利润", formula: "赛季总RMT收益 - 固定成本 × 初始汇率" }
+    ];
+
+    var columns = [
+      { key: "solo", label: t('tabSolo'), color: "#ff9800" },
+      { key: "party", label: t('tabParty'), color: "#e6b422" },
+      { key: "multi", label: t('tabMulti'), color: "#ab47bc" }
+    ];
+
+    var rmtCells = {};
+    var container = document.createElement("div");
+    container.className = "RMT三栏";
+
+    columns.forEach(function(col) {
+      var colDiv = document.createElement("div");
+      colDiv.className = "RMT栏";
+
+      var header = document.createElement("div");
+      header.className = "RMT栏头";
+      header.style.color = col.color;
+      header.textContent = col.label;
+      colDiv.appendChild(header);
+
+      var table = document.createElement("table");
+      table.className = "RMT对比表";
+      var tbody = document.createElement("tbody");
+
+      metricDefs.forEach(function(m) {
+        var tr1 = document.createElement("tr");
+        tr1.className = "rmt值行";
+        var labelTd = document.createElement("td");
+        labelTd.className = "rmt指标";
+        labelTd.textContent = m.label;
+        var valTd = document.createElement("td");
+        var valSpan = document.createElement("div");
+        valSpan.className = "rmt值";
+        valSpan.textContent = "—";
+        var ratioDiv = document.createElement("div");
+        ratioDiv.className = "rmt倍数";
+        valTd.appendChild(valSpan);
+        valTd.appendChild(ratioDiv);
+        tr1.appendChild(labelTd);
+        tr1.appendChild(valTd);
+        tbody.appendChild(tr1);
+
+        var tr2 = document.createElement("tr");
+        tr2.className = "rmt算式行";
+        var exprTd = document.createElement("td");
+        exprTd.colSpan = 2;
+        var descDiv = document.createElement("div");
+        descDiv.className = "rmt描述";
+        descDiv.textContent = m.desc;
+        var formulaDiv = document.createElement("div");
+        formulaDiv.className = "rmt公式";
+        formulaDiv.textContent = m.formula;
+        var exprDiv = document.createElement("div");
+        exprDiv.className = "rmt算式";
+        exprTd.appendChild(descDiv);
+        exprTd.appendChild(formulaDiv);
+        exprTd.appendChild(exprDiv);
+        tr2.appendChild(exprTd);
+        tbody.appendChild(tr2);
+
+        rmtCells[m.key + "_" + col.key] = { val: valSpan, expr: exprDiv, ratio: ratioDiv };
+      });
+
+      table.appendChild(tbody);
+      colDiv.appendChild(table);
+      container.appendChild(colDiv);
+    });
+
+    resultPanel.content.appendChild(container);
+    grid.appendChild(resultPanel.el);
+
+    var chartPanel = createPanel({ size: "md", head: t('rmtChartHead') });
+    var ch = chartPanel.el.querySelector(".panel-head");
+    ch.style.color = getColorHex("red", 400);
+    ch.style.fontSize = "18px";
+    ch.style.fontWeight = "700";
+
+    var chartSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    chartSvg.setAttribute("viewBox", "0 0 600 300");
+    chartSvg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+    chartSvg.style.width = "100%";
+    chartSvg.style.height = "auto";
+    chartSvg.style.position = "relative";
+
+    var svgBg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    svgBg.setAttribute("width", "600");
+    svgBg.setAttribute("height", "300");
+    svgBg.setAttribute("fill", "var(--panel-bg)");
+    chartSvg.appendChild(svgBg);
+
+    var chartGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    chartSvg.appendChild(chartGroup);
+
+    var legendGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    chartSvg.appendChild(legendGroup);
+
+    var chartCursorLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    chartCursorLine.setAttribute("y1", "20"); chartCursorLine.setAttribute("y2", "245");
+    chartCursorLine.setAttribute("stroke", "#ffffff"); chartCursorLine.setAttribute("stroke-width", "1");
+    chartCursorLine.setAttribute("stroke-dasharray", "3,3"); chartCursorLine.setAttribute("opacity", "0");
+    chartSvg.appendChild(chartCursorLine);
+
+    var chartTooltipBg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    chartTooltipBg.setAttribute("fill", "rgba(0,0,0,0.85)"); chartTooltipBg.setAttribute("rx", "4");
+    chartTooltipBg.setAttribute("opacity", "0");
+    chartSvg.appendChild(chartTooltipBg);
+
+    var chartTooltipText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    chartTooltipText.setAttribute("fill", "#ffffff"); chartTooltipText.setAttribute("font-size", "11");
+    chartTooltipText.setAttribute("opacity", "0");
+    chartSvg.appendChild(chartTooltipText);
+
+    var chartHitArea = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    chartHitArea.setAttribute("width", "600"); chartHitArea.setAttribute("height", "300");
+    chartHitArea.setAttribute("fill", "transparent"); chartHitArea.setAttribute("cursor", "crosshair");
+    chartSvg.appendChild(chartHitArea);
+
+    var chartDataRef = { solo: [], party: [], multi: [], seasonDays: 0, padL: 55, padR: 15, cw: 530 };
+
+    chartSvg.addEventListener("mousemove", function(e) {
+      var rect = chartSvg.getBoundingClientRect();
+      var scaleX = 600 / rect.width;
+      var mx = (e.clientX - rect.left) * scaleX;
+      var pL = chartDataRef.padL, pR = chartDataRef.padR, cWidth = chartDataRef.cw;
+      if (mx < pL || mx > 600 - pR) { chartCursorLine.setAttribute("opacity", "0"); chartTooltipBg.setAttribute("opacity", "0"); chartTooltipText.setAttribute("opacity", "0"); return; }
+      var ratio = (mx - pL) / cWidth;
+      var dayIdx = Math.round(ratio * (chartDataRef.seasonDays - 1));
+      if (dayIdx < 0) dayIdx = 0; if (dayIdx >= chartDataRef.seasonDays) dayIdx = chartDataRef.seasonDays - 1;
+      var snapX = pL + (dayIdx / Math.max(1, chartDataRef.seasonDays - 1)) * cWidth;
+      chartCursorLine.setAttribute("x1", snapX); chartCursorLine.setAttribute("x2", snapX);
+      chartCursorLine.setAttribute("opacity", "0.6");
+      var lines = [];
+      lines.push("D" + (dayIdx + 1));
+      if (chartDataRef.solo[dayIdx] !== undefined) lines.push(t('tabSolo') + ": " + chartDataRef.solo[dayIdx].toFixed(1) + t('unitYuan'));
+      if (chartDataRef.party[dayIdx] !== undefined) lines.push(t('tabParty') + ": " + chartDataRef.party[dayIdx].toFixed(1) + t('unitYuan'));
+      if (chartDataRef.multi[dayIdx] !== undefined) lines.push(t('tabMulti') + ": " + chartDataRef.multi[dayIdx].toFixed(1) + t('unitYuan'));
+      var tipText = lines.join("  ");
+      chartTooltipText.textContent = tipText;
+      var tipX = snapX + 8;
+      if (tipX + tipText.length * 7 > 595) tipX = snapX - tipText.length * 7 - 8;
+      chartTooltipText.setAttribute("x", tipX); chartTooltipText.setAttribute("y", 16);
+      var bbox = chartTooltipText.getBBox();
+      chartTooltipBg.setAttribute("x", bbox.x - 4); chartTooltipBg.setAttribute("y", bbox.y - 2);
+      chartTooltipBg.setAttribute("width", bbox.width + 8); chartTooltipBg.setAttribute("height", bbox.height + 4);
+      chartTooltipBg.setAttribute("opacity", "1"); chartTooltipText.setAttribute("opacity", "1");
+    });
+    chartSvg.addEventListener("mouseleave", function() {
+      chartCursorLine.setAttribute("opacity", "0"); chartTooltipBg.setAttribute("opacity", "0"); chartTooltipText.setAttribute("opacity", "0");
+    });
+
+    chartPanel.content.appendChild(chartSvg);
+
+    var netChartPanel = createPanel({ size: "md", head: t('rmtNetChartHead') });
+    var nch = netChartPanel.el.querySelector(".panel-head");
+    nch.style.color = getColorHex("red", 400);
+    nch.style.fontSize = "18px";
+    nch.style.fontWeight = "700";
+
+    var netChartSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    netChartSvg.setAttribute("viewBox", "0 0 600 300");
+    netChartSvg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+    netChartSvg.style.width = "100%";
+    netChartSvg.style.height = "auto";
+    netChartSvg.style.position = "relative";
+
+    var netSvgBg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    netSvgBg.setAttribute("width", "600");
+    netSvgBg.setAttribute("height", "300");
+    netSvgBg.setAttribute("fill", "var(--panel-bg)");
+    netChartSvg.appendChild(netSvgBg);
+
+    var netChartGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    netChartSvg.appendChild(netChartGroup);
+
+    var netLegendGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    netChartSvg.appendChild(netLegendGroup);
+
+    var netCursorLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    netCursorLine.setAttribute("y1", "20"); netCursorLine.setAttribute("y2", "245");
+    netCursorLine.setAttribute("stroke", "#ffffff"); netCursorLine.setAttribute("stroke-width", "1");
+    netCursorLine.setAttribute("stroke-dasharray", "3,3"); netCursorLine.setAttribute("opacity", "0");
+    netChartSvg.appendChild(netCursorLine);
+
+    var netTooltipBg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    netTooltipBg.setAttribute("fill", "rgba(0,0,0,0.85)"); netTooltipBg.setAttribute("rx", "4");
+    netTooltipBg.setAttribute("opacity", "0");
+    netChartSvg.appendChild(netTooltipBg);
+
+    var netTooltipText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    netTooltipText.setAttribute("fill", "#ffffff"); netTooltipText.setAttribute("font-size", "11");
+    netTooltipText.setAttribute("opacity", "0");
+    netChartSvg.appendChild(netTooltipText);
+
+    var netHitArea = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    netHitArea.setAttribute("width", "600"); netHitArea.setAttribute("height", "300");
+    netHitArea.setAttribute("fill", "transparent"); netHitArea.setAttribute("cursor", "crosshair");
+    netChartSvg.appendChild(netHitArea);
+
+    var netDataRef = { solo: [], party: [], multi: [], seasonDays: 0, padL: 55, padR: 15, cw: 530 };
+
+    netChartSvg.addEventListener("mousemove", function(e) {
+      var rect = netChartSvg.getBoundingClientRect();
+      var scaleX = 600 / rect.width;
+      var mx = (e.clientX - rect.left) * scaleX;
+      var pL = netDataRef.padL, pR = netDataRef.padR, cWidth = netDataRef.cw;
+      if (mx < pL || mx > 600 - pR) { netCursorLine.setAttribute("opacity", "0"); netTooltipBg.setAttribute("opacity", "0"); netTooltipText.setAttribute("opacity", "0"); return; }
+      var ratio = (mx - pL) / cWidth;
+      var dayIdx = Math.round(ratio * (netDataRef.seasonDays - 1));
+      if (dayIdx < 0) dayIdx = 0; if (dayIdx >= netDataRef.seasonDays) dayIdx = netDataRef.seasonDays - 1;
+      var snapX = pL + (dayIdx / Math.max(1, netDataRef.seasonDays - 1)) * cWidth;
+      netCursorLine.setAttribute("x1", snapX); netCursorLine.setAttribute("x2", snapX);
+      netCursorLine.setAttribute("opacity", "0.6");
+      var lines = [];
+      lines.push("D" + (dayIdx + 1));
+      if (netDataRef.solo[dayIdx] !== undefined) lines.push(t('tabSolo') + ": " + netDataRef.solo[dayIdx].toFixed(1) + t('unitYuan'));
+      if (netDataRef.party[dayIdx] !== undefined) lines.push(t('tabParty') + ": " + netDataRef.party[dayIdx].toFixed(1) + t('unitYuan'));
+      if (netDataRef.multi[dayIdx] !== undefined) lines.push(t('tabMulti') + ": " + netDataRef.multi[dayIdx].toFixed(1) + t('unitYuan'));
+      var tipText = lines.join("  ");
+      netTooltipText.textContent = tipText;
+      var tipX = snapX + 8;
+      if (tipX + tipText.length * 7 > 595) tipX = snapX - tipText.length * 7 - 8;
+      netTooltipText.setAttribute("x", tipX); netTooltipText.setAttribute("y", 16);
+      var bbox = netTooltipText.getBBox();
+      netTooltipBg.setAttribute("x", bbox.x - 4); netTooltipBg.setAttribute("y", bbox.y - 2);
+      netTooltipBg.setAttribute("width", bbox.width + 8); netTooltipBg.setAttribute("height", bbox.height + 4);
+      netTooltipBg.setAttribute("opacity", "1"); netTooltipText.setAttribute("opacity", "1");
+    });
+    netChartSvg.addEventListener("mouseleave", function() {
+      netCursorLine.setAttribute("opacity", "0"); netTooltipBg.setAttribute("opacity", "0"); netTooltipText.setAttribute("opacity", "0");
+    });
+
+    netChartPanel.content.appendChild(netChartSvg);
+
+    grid.appendChild(chartPanel.el);
+    grid.appendChild(netChartPanel.el);
+
+    tabPanels["tab-rmt"].appendChild(grid);
+
+    function recalcRmt() {
+      var sv = soloValues;
+      if (!sv) return;
+
+      var rate = rateRow.input.getValue();
+      var decay = decayRow.input.getValue();
+      var currentDay = currentDayRow.input.getValue();
+
+      var currentRate = rate * Math.pow(decay, currentDay - 1);
+
+      function seasonRmtCalc(dailyProfit, prepDays, effectiveDays) {
+        if (Math.abs(decay - 1) < 1e-9) {
+          return dailyProfit * rate * effectiveDays;
+        }
+        return dailyProfit * rate * Math.pow(decay, prepDays) * (1 - Math.pow(decay, effectiveDays)) / (1 - decay);
+      }
+
+      function seasonRmtExpr(dailyProfit, prepDays, effectiveDays) {
+        if (Math.abs(decay - 1) < 1e-9) {
+          return dailyProfit.toFixed(1) + " × " + rate + " × " + effectiveDays.toFixed(0);
+        }
+        return dailyProfit.toFixed(1) + " × " + rate + " × " + decay + "^" + prepDays.toFixed(1) + " × (1-" + decay + "^" + effectiveDays.toFixed(0) + ")÷(1-" + decay + ")";
+      }
+
+      rmtCells["hourly_solo"].val.innerHTML = sv.hourlyProfit.toFixed(2) + "<span class='结果单位'> 神圣石</span>";
+      rmtCells["hourly_solo"].expr.textContent = sv.dailyProfit.toFixed(1) + " ÷ " + (sv.dailyMinutes / 60).toFixed(1) + "h";
+
+      var soloHourlyRmt = sv.hourlyProfit * currentRate;
+      rmtCells["hourlyRmt_solo"].val.innerHTML = soloHourlyRmt.toFixed(2) + "<span class='结果单位'> 元</span>";
+      rmtCells["hourlyRmt_solo"].expr.textContent = sv.hourlyProfit.toFixed(2) + " × " + currentRate.toFixed(4) + "(第" + currentDay + "天汇率)";
+
+      var soloDailyRmt = sv.dailyProfit * currentRate;
+      rmtCells["dailyRmt_solo"].val.innerHTML = soloDailyRmt.toFixed(2) + "<span class='结果单位'> 元</span>";
+      rmtCells["dailyRmt_solo"].expr.textContent = sv.dailyProfit.toFixed(1) + " × " + currentRate.toFixed(4) + "(第" + currentDay + "天汇率)";
+
+      var soloSeasonRmt = seasonRmtCalc(sv.dailyProfit, sv.prepDays, sv.effectiveDays);
+      rmtCells["seasonRmt_solo"].val.innerHTML = soloSeasonRmt.toFixed(2) + "<span class='结果单位'> 元</span>";
+      rmtCells["seasonRmt_solo"].expr.textContent = seasonRmtExpr(sv.dailyProfit, sv.prepDays, sv.effectiveDays);
+
+      var soloCostRmt = sv.totalFixedCost * rate;
+      var soloSeasonNetRmt = soloSeasonRmt - soloCostRmt;
+      rmtCells["seasonNetRmt_solo"].val.innerHTML = soloSeasonNetRmt.toFixed(2) + "<span class='结果单位'> 元</span>";
+      rmtCells["seasonNetRmt_solo"].expr.textContent = soloSeasonRmt.toFixed(1) + " - " + sv.totalFixedCost.toFixed(1) + "×" + rate + "=" + soloCostRmt.toFixed(1);
+
+      if (partyValues) {
+        rmtCells["hourly_party"].val.innerHTML = partyValues.hourlyProfit.toFixed(2) + "<span class='结果单位'> 神圣石</span>";
+        rmtCells["hourly_party"].expr.textContent = partyValues.dailyProfit.toFixed(1) + " ÷ " + (sv.dailyMinutes / 60).toFixed(1) + "h";
+        rmtCells["hourly_party"].ratio.textContent = sv.hourlyProfit > 0 ? "×" + (partyValues.hourlyProfit / sv.hourlyProfit).toFixed(2) : "";
+
+        var partyHourlyRmt = partyValues.hourlyProfit * currentRate;
+        rmtCells["hourlyRmt_party"].val.innerHTML = partyHourlyRmt.toFixed(2) + "<span class='结果单位'> 元</span>";
+        rmtCells["hourlyRmt_party"].expr.textContent = partyValues.hourlyProfit.toFixed(2) + " × " + currentRate.toFixed(4) + "(第" + currentDay + "天汇率)";
+        rmtCells["hourlyRmt_party"].ratio.textContent = soloHourlyRmt > 0 ? "×" + (partyHourlyRmt / soloHourlyRmt).toFixed(2) : "";
+
+        var partyDailyRmt = partyValues.dailyProfit * currentRate;
+        rmtCells["dailyRmt_party"].val.innerHTML = partyDailyRmt.toFixed(2) + "<span class='结果单位'> 元</span>";
+        rmtCells["dailyRmt_party"].expr.textContent = partyValues.dailyProfit.toFixed(1) + " × " + currentRate.toFixed(4) + "(第" + currentDay + "天汇率)";
+        rmtCells["dailyRmt_party"].ratio.textContent = soloDailyRmt > 0 ? "×" + (partyDailyRmt / soloDailyRmt).toFixed(2) : "";
+
+        var partySeasonRmt = seasonRmtCalc(partyValues.dailyProfit, sv.prepDays, sv.effectiveDays);
+        rmtCells["seasonRmt_party"].val.innerHTML = partySeasonRmt.toFixed(2) + "<span class='结果单位'> 元</span>";
+        rmtCells["seasonRmt_party"].expr.textContent = seasonRmtExpr(partyValues.dailyProfit, sv.prepDays, sv.effectiveDays);
+        rmtCells["seasonRmt_party"].ratio.textContent = soloSeasonRmt > 0 ? "×" + (partySeasonRmt / soloSeasonRmt).toFixed(2) : "";
+
+        var partyCostRmt = partyValues.fixedCost * rate;
+        var partySeasonNetRmt = partySeasonRmt - partyCostRmt;
+        rmtCells["seasonNetRmt_party"].val.innerHTML = partySeasonNetRmt.toFixed(2) + "<span class='结果单位'> 元</span>";
+        rmtCells["seasonNetRmt_party"].expr.textContent = partySeasonRmt.toFixed(1) + " - " + partyValues.fixedCost.toFixed(1) + "×" + rate + "=" + partyCostRmt.toFixed(1);
+        rmtCells["seasonNetRmt_party"].ratio.textContent = soloSeasonNetRmt > 0 ? "×" + (partySeasonNetRmt / soloSeasonNetRmt).toFixed(2) : "";
+      }
+
+      if (multiValues) {
+        rmtCells["hourly_multi"].val.innerHTML = multiValues.hourlyProfit.toFixed(2) + "<span class='结果单位'> 神圣石</span>";
+        rmtCells["hourly_multi"].expr.textContent = multiValues.dailyProfit.toFixed(1) + " ÷ " + (sv.dailyMinutes / 60).toFixed(1) + "h";
+        rmtCells["hourly_multi"].ratio.textContent = sv.hourlyProfit > 0 ? "×" + (multiValues.hourlyProfit / sv.hourlyProfit).toFixed(2) : "";
+
+        var multiHourlyRmt = multiValues.hourlyProfit * currentRate;
+        rmtCells["hourlyRmt_multi"].val.innerHTML = multiHourlyRmt.toFixed(2) + "<span class='结果单位'> 元</span>";
+        rmtCells["hourlyRmt_multi"].expr.textContent = multiValues.hourlyProfit.toFixed(2) + " × " + currentRate.toFixed(4) + "(第" + currentDay + "天汇率)";
+        rmtCells["hourlyRmt_multi"].ratio.textContent = soloHourlyRmt > 0 ? "×" + (multiHourlyRmt / soloHourlyRmt).toFixed(2) : "";
+
+        var multiDailyRmt = multiValues.dailyProfit * currentRate;
+        rmtCells["dailyRmt_multi"].val.innerHTML = multiDailyRmt.toFixed(2) + "<span class='结果单位'> 元</span>";
+        rmtCells["dailyRmt_multi"].expr.textContent = multiValues.dailyProfit.toFixed(1) + " × " + currentRate.toFixed(4) + "(第" + currentDay + "天汇率)";
+        rmtCells["dailyRmt_multi"].ratio.textContent = soloDailyRmt > 0 ? "×" + (multiDailyRmt / soloDailyRmt).toFixed(2) : "";
+
+        var multiSeasonRmt = seasonRmtCalc(multiValues.dailyProfit, sv.prepDays, sv.effectiveDays);
+        rmtCells["seasonRmt_multi"].val.innerHTML = multiSeasonRmt.toFixed(2) + "<span class='结果单位'> 元</span>";
+        rmtCells["seasonRmt_multi"].expr.textContent = seasonRmtExpr(multiValues.dailyProfit, sv.prepDays, sv.effectiveDays);
+        rmtCells["seasonRmt_multi"].ratio.textContent = soloSeasonRmt > 0 ? "×" + (multiSeasonRmt / soloSeasonRmt).toFixed(2) : "";
+
+        var multiCostRmt = multiValues.fixedCost * rate;
+        var multiSeasonNetRmt = multiSeasonRmt - multiCostRmt;
+        rmtCells["seasonNetRmt_multi"].val.innerHTML = multiSeasonNetRmt.toFixed(2) + "<span class='结果单位'> 元</span>";
+        rmtCells["seasonNetRmt_multi"].expr.textContent = multiSeasonRmt.toFixed(1) + " - " + multiValues.fixedCost.toFixed(1) + "×" + rate + "=" + multiCostRmt.toFixed(1);
+        rmtCells["seasonNetRmt_multi"].ratio.textContent = soloSeasonNetRmt > 0 ? "×" + (multiSeasonNetRmt / soloSeasonNetRmt).toFixed(2) : "";
+      }
+
+      while (chartGroup.firstChild) chartGroup.removeChild(chartGroup.firstChild);
+      while (legendGroup.firstChild) legendGroup.removeChild(legendGroup.firstChild);
+
+      var seasonDays = sv.seasonDays;
+      var padL = 55, padR = 15, padT = 20, padB = 35;
+      var cw = 600 - padL - padR;
+      var ch2 = 300 - padT - padB;
+
+      var soloDaily = sv.dailyProfit;
+      var partyDaily = partyValues ? partyValues.dailyProfit : 0;
+      var multiDaily = multiValues ? multiValues.dailyProfit : 0;
+
+      var maxVal = 0;
+      var soloCum = 0, partyCum = 0, multiCum = 0;
+      var soloData = [], partyData = [], multiData = [];
+      for (var d = 1; d <= seasonDays; d++) {
+        var dayRate = rate * Math.pow(decay, d - 1);
+        if (d > sv.prepDays) {
+          soloCum += soloDaily * dayRate;
+          partyCum += partyDaily * dayRate;
+          multiCum += multiDaily * dayRate;
+        }
+        soloData.push(soloCum);
+        partyData.push(partyCum);
+        multiData.push(multiCum);
+        if (soloCum > maxVal) maxVal = soloCum;
+        if (partyCum > maxVal) maxVal = partyCum;
+        if (multiCum > maxVal) maxVal = multiCum;
+      }
+      if (maxVal <= 0) maxVal = 1;
+
+      function makeLine(data, color) {
+        var pts = [];
+        for (var i = 0; i < data.length; i++) {
+          var x = padL + (i / Math.max(1, seasonDays - 1)) * cw;
+          var y = padT + ch2 - (data[i] / maxVal) * ch2;
+          pts.push(x.toFixed(1) + "," + y.toFixed(1));
+        }
+        var pl = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+        pl.setAttribute("points", pts.join(" "));
+        pl.setAttribute("fill", "none");
+        pl.setAttribute("stroke", color);
+        pl.setAttribute("stroke-width", "2");
+        pl.setAttribute("stroke-linejoin", "round");
+        chartGroup.appendChild(pl);
+      }
+
+      for (var gi = 0; gi <= 4; gi++) {
+        var gy = padT + (gi / 4) * ch2;
+        var gl = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        gl.setAttribute("x1", padL); gl.setAttribute("y1", gy);
+        gl.setAttribute("x2", padL + cw); gl.setAttribute("y2", gy);
+        gl.setAttribute("stroke", "var(--line)"); gl.setAttribute("stroke-width", "0.5");
+        chartGroup.appendChild(gl);
+        var gt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        gt.setAttribute("x", padL - 5); gt.setAttribute("y", gy + 4);
+        gt.setAttribute("text-anchor", "end"); gt.setAttribute("fill", "var(--muted)");
+        gt.setAttribute("font-size", "10");
+        gt.textContent = (maxVal * (1 - gi / 4)).toFixed(0) + (gi === 0 ? " 元" : "");
+        chartGroup.appendChild(gt);
+      }
+
+      for (var xi = 0; xi <= 4; xi++) {
+        var xd = Math.round(seasonDays * xi / 4);
+        var xx = padL + (xi / 4) * cw;
+        var xl = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        xl.setAttribute("x1", xx); xl.setAttribute("y1", padT);
+        xl.setAttribute("x2", xx); xl.setAttribute("y2", padT + ch2);
+        xl.setAttribute("stroke", "var(--line)"); xl.setAttribute("stroke-width", "0.5");
+        chartGroup.appendChild(xl);
+        var xt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        xt.setAttribute("x", xx); xt.setAttribute("y", padT + ch2 + 15);
+        xt.setAttribute("text-anchor", "middle"); xt.setAttribute("fill", "var(--muted)");
+        xt.setAttribute("font-size", "10");
+        xt.textContent = "第" + xd + "天";
+        chartGroup.appendChild(xt);
+      }
+
+      var axisLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      axisLine.setAttribute("x1", padL); axisLine.setAttribute("y1", padT);
+      axisLine.setAttribute("x2", padL); axisLine.setAttribute("y2", padT + ch2);
+      axisLine.setAttribute("stroke", "var(--text)"); axisLine.setAttribute("stroke-width", "1");
+      chartGroup.appendChild(axisLine);
+      var axisBottom = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      axisBottom.setAttribute("x1", padL); axisBottom.setAttribute("y1", padT + ch2);
+      axisBottom.setAttribute("x2", padL + cw); axisBottom.setAttribute("y2", padT + ch2);
+      axisBottom.setAttribute("stroke", "var(--text)"); axisBottom.setAttribute("stroke-width", "1");
+      chartGroup.appendChild(axisBottom);
+
+      makeLine(soloData, "#ff9800");
+      makeLine(partyData, "#e6b422");
+      makeLine(multiData, "#ab47bc");
+
+      chartDataRef.solo = soloData;
+      chartDataRef.party = partyData;
+      chartDataRef.multi = multiData;
+      chartDataRef.seasonDays = seasonDays;
+      chartDataRef.padL = padL;
+      chartDataRef.padR = padR;
+      chartDataRef.cw = cw;
+
+      var legends = [
+        { label: t('tabSolo'), color: "#ff9800" },
+        { label: t('tabParty'), color: "#e6b422" },
+        { label: t('tabMulti'), color: "#ab47bc" }
+      ];
+      legends.forEach(function(lg, li) {
+        var lx = padL + li * 120;
+        var ly = padT + ch2 + 28;
+        var lr = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        lr.setAttribute("x", lx); lr.setAttribute("y", ly - 8);
+        lr.setAttribute("width", "12"); lr.setAttribute("height", "4");
+        lr.setAttribute("fill", lg.color);
+        legendGroup.appendChild(lr);
+        var lt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        lt.setAttribute("x", lx + 16); lt.setAttribute("y", ly - 3);
+        lt.setAttribute("fill", "var(--text)"); lt.setAttribute("font-size", "11");
+        lt.textContent = lg.label;
+        legendGroup.appendChild(lt);
+      });
+
+      while (netChartGroup.firstChild) netChartGroup.removeChild(netChartGroup.firstChild);
+      while (netLegendGroup.firstChild) netLegendGroup.removeChild(netLegendGroup.firstChild);
+
+      var soloCostRmt2 = sv.totalFixedCost * rate;
+      var partyCostRmt2 = partyValues ? partyValues.fixedCost * rate : 0;
+      var multiCostRmt2 = multiValues ? multiValues.fixedCost * rate : 0;
+
+      var netMin = 0, netMax = 0;
+      var soloNetData = [], partyNetData = [], multiNetData = [];
+      for (var nd = 0; nd < seasonDays; nd++) {
+        var sn = soloData[nd] - soloCostRmt2;
+        var pn = partyData[nd] - partyCostRmt2;
+        var mn = multiData[nd] - multiCostRmt2;
+        soloNetData.push(sn);
+        partyNetData.push(pn);
+        multiNetData.push(mn);
+        if (sn < netMin) netMin = sn;
+        if (pn < netMin) netMin = pn;
+        if (mn < netMin) netMin = mn;
+        if (sn > netMax) netMax = sn;
+        if (pn > netMax) netMax = pn;
+        if (mn > netMax) netMax = mn;
+      }
+      if (netMax <= netMin) { netMax = netMin + 1; }
+      var netRange = netMax - netMin;
+
+      function netY(val) {
+        return padT + ch2 - ((val - netMin) / netRange) * ch2;
+      }
+
+      function makeNetLine(data, color) {
+        var pts = [];
+        for (var ni = 0; ni < data.length; ni++) {
+          var nx = padL + (ni / Math.max(1, seasonDays - 1)) * cw;
+          var ny = netY(data[ni]);
+          pts.push(nx.toFixed(1) + "," + ny.toFixed(1));
+        }
+        var npl = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+        npl.setAttribute("points", pts.join(" "));
+        npl.setAttribute("fill", "none");
+        npl.setAttribute("stroke", color);
+        npl.setAttribute("stroke-width", "2");
+        npl.setAttribute("stroke-linejoin", "round");
+        netChartGroup.appendChild(npl);
+      }
+
+      var zeroY = netY(0);
+      if (zeroY > padT && zeroY < padT + ch2) {
+        var zeroLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        zeroLine.setAttribute("x1", padL); zeroLine.setAttribute("y1", zeroY);
+        zeroLine.setAttribute("x2", padL + cw); zeroLine.setAttribute("y2", zeroY);
+        zeroLine.setAttribute("stroke", "#ff4444"); zeroLine.setAttribute("stroke-width", "1");
+        zeroLine.setAttribute("stroke-dasharray", "4,3");
+        netChartGroup.appendChild(zeroLine);
+        var zeroLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        zeroLabel.setAttribute("x", padL - 5); zeroLabel.setAttribute("y", zeroY + 4);
+        zeroLabel.setAttribute("text-anchor", "end"); zeroLabel.setAttribute("fill", "#ff4444"); zeroLabel.setAttribute("font-size", "10");
+        zeroLabel.textContent = "0";
+        netChartGroup.appendChild(zeroLabel);
+      }
+
+      for (var ngi = 0; ngi <= 4; ngi++) {
+        var ngy = padT + (ngi / 4) * ch2;
+        var ngl = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        ngl.setAttribute("x1", padL); ngl.setAttribute("y1", ngy);
+        ngl.setAttribute("x2", padL + cw); ngl.setAttribute("y2", ngy);
+        ngl.setAttribute("stroke", "var(--line)"); ngl.setAttribute("stroke-width", "0.5");
+        netChartGroup.appendChild(ngl);
+        var ngt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        ngt.setAttribute("x", padL - 5); ngt.setAttribute("y", ngy + 4);
+        ngt.setAttribute("text-anchor", "end"); ngt.setAttribute("fill", "var(--muted)");
+        ngt.setAttribute("font-size", "10");
+        ngt.textContent = (netMax - ngi / 4 * netRange).toFixed(0) + (ngi === 0 ? " 元" : "");
+        netChartGroup.appendChild(ngt);
+      }
+
+      for (var nxi = 0; nxi <= 4; nxi++) {
+        var nxd = Math.round(seasonDays * nxi / 4);
+        var nxx = padL + (nxi / 4) * cw;
+        var nxl = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        nxl.setAttribute("x1", nxx); nxl.setAttribute("y1", padT);
+        nxl.setAttribute("x2", nxx); nxl.setAttribute("y2", padT + ch2);
+        nxl.setAttribute("stroke", "var(--line)"); nxl.setAttribute("stroke-width", "0.5");
+        netChartGroup.appendChild(nxl);
+        var nxt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        nxt.setAttribute("x", nxx); nxt.setAttribute("y", padT + ch2 + 15);
+        nxt.setAttribute("text-anchor", "middle"); nxt.setAttribute("fill", "var(--muted)");
+        nxt.setAttribute("font-size", "10");
+        nxt.textContent = "第" + nxd + "天";
+        netChartGroup.appendChild(nxt);
+      }
+
+      var netAxisL = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      netAxisL.setAttribute("x1", padL); netAxisL.setAttribute("y1", padT);
+      netAxisL.setAttribute("x2", padL); netAxisL.setAttribute("y2", padT + ch2);
+      netAxisL.setAttribute("stroke", "var(--text)"); netAxisL.setAttribute("stroke-width", "1");
+      netChartGroup.appendChild(netAxisL);
+      var netAxisB = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      netAxisB.setAttribute("x1", padL); netAxisB.setAttribute("y1", padT + ch2);
+      netAxisB.setAttribute("x2", padL + cw); netAxisB.setAttribute("y2", padT + ch2);
+      netAxisB.setAttribute("stroke", "var(--text)"); netAxisB.setAttribute("stroke-width", "1");
+      netChartGroup.appendChild(netAxisB);
+
+      makeNetLine(soloNetData, "#ff9800");
+      makeNetLine(partyNetData, "#e6b422");
+      makeNetLine(multiNetData, "#ab47bc");
+
+      netDataRef.solo = soloNetData;
+      netDataRef.party = partyNetData;
+      netDataRef.multi = multiNetData;
+      netDataRef.seasonDays = seasonDays;
+      netDataRef.padL = padL;
+      netDataRef.padR = padR;
+      netDataRef.cw = cw;
+
+      legends.forEach(function(lg2, li2) {
+        var lx2 = padL + li2 * 120;
+        var ly2 = padT + ch2 + 28;
+        var lr2 = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        lr2.setAttribute("x", lx2); lr2.setAttribute("y", ly2 - 8);
+        lr2.setAttribute("width", "12"); lr2.setAttribute("height", "4");
+        lr2.setAttribute("fill", lg2.color);
+        netLegendGroup.appendChild(lr2);
+        var lt2 = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        lt2.setAttribute("x", lx2 + 16); lt2.setAttribute("y", ly2 - 3);
+        lt2.setAttribute("fill", "var(--text)"); lt2.setAttribute("font-size", "11");
+        lt2.textContent = lg2.label;
+        netLegendGroup.appendChild(lt2);
+      });
+    }
+
+    rateRow.addOnChange(recalcRmt);
+    decayRow.addOnChange(recalcRmt);
+    currentDayRow.addOnChange(recalcRmt);
+    rmtRecalcFn = recalcRmt;
+
+    allInputs["神圣石汇率"] = rateRow.input;
+    allInputs["汇率衰减系数"] = decayRow.input;
+    allInputs["当前赛季天数"] = currentDayRow.input;
+  })();
+
+  (function buildRhetoricTab() {
+    var container = document.createElement("div");
+    container.className = "舆论攻防区";
+
+    var intro = document.createElement("div");
+    intro.className = "舆论导语";
+    intro.innerHTML = t('rhetoricIntro');
+    container.appendChild(intro);
+
+    var rhetoricData = [
+      {
+        catKey: 'rhetoricCatLogic', descKey: 'rhetoricCatLogicDesc', color: '#ff9800',
+        items: [
+          { type: '滑坡谬误', detail: '将无必然联系的A、B、C事件强行串联成必然的灾难性结果。例如"今天你让步，明天他们就会得寸进尺，最后你就彻底完了"，每一个环节都需要独立证明其必然性，而非默认连锁成立。' },
+          { type: '以偏概全', detail: '用孤立的、个别的案例来否定全局。例如"你的一个项目出了纰漏，可见你所有工作都有问题"，个例不代表系统性问题，需要看总体比例。' },
+          { type: '虚假两难', detail: '将复杂问题粗暴地简化为非黑即白的两个极端选项，封堵所有中间立场。例如"不支持我这个方案，就是冷血、漠视生命"，实际上解决问题有多种途径。' },
+          { type: '偷换概念/稻草人', detail: '先歪曲你的观点，竖立起一个更容易攻击的"稻草人"，再猛烈攻击它。例如把"追求效率"曲解为"冷血压榨"，把"优化建议"曲解为"全盘否定"。' },
+          { type: '循环论证', detail: '把结论本身当作前提来论证，逻辑上原地打转。例如"这事为什么错？因为规定就是不对的。为什么规定不对？因为它导致了错事"，实际上没有提供任何第三方证据。' },
+          { type: '诉诸权威', detail: '用不相关领域的权威来压制你，让你不敢反驳。例如"XX专家都这么说了，你算什么？"权威在非其专业领域的意见并不比普通人更有说服力，论点是否成立应看证据和逻辑。' },
+          { type: '诉诸群众/从众谬误', detail: '用"大多数人都这么认为"来证明某个观点的正确性。例如"大家都觉得你有问题，你还不反思？"多数人的意见不等于事实，真理不靠投票决定。' }
+        ]
+      },
+      {
+        catKey: 'rhetoricCatIdentity', descKey: 'rhetoricCatIdentityDesc', color: '#e6b422',
+        items: [
+          { type: '人身攻击', detail: '攻击论点提出者的个人特征，以取代对论点的讨论。例如"你是什么东西，也配谈这个问题？"，将话题从论点本身转移到攻击者身上。' },
+          { type: '动机揣测', detail: '赋予你一个阴暗的道德动机，让你的所有行为都显得可疑。例如"你之所以这么干，还不是为了捞钱/博名？"，用虚构的动机替代对行为本身的评价。' },
+          { type: '扣帽子/贴标签', detail: '简单粗暴地将你归入某个负面群体，如"理中客""小粉红""精资"。一旦贴上标签，你就成了一个符号，没人再听你说了什么。' },
+          { type: '污名化关联', detail: '用你所关联的人或物的负面形象，来污染你的形象。例如"你这个观点，和历史上那个臭名昭著的XX如出一辙"，观点是否成立应看其本身逻辑。' },
+          { type: '诉诸虚伪（你也是）', detail: '用你的不完美来否定你的批评权。例如"你自己也做过类似的事，有什么资格说我？"批评者的个人瑕疵不影响批评本身的成立与否，论点和论者是两回事。' },
+          { type: '资格审查', detail: '以你没有某种资质为由，直接剥夺你发言的资格。例如"你在这个领域没有学历/经验，所以你的观点无效"，观点是否正确取决于证据和逻辑，而非发言者的身份。' }
+        ]
+      },
+      {
+        catKey: 'rhetoricCatEmotion', descKey: 'rhetoricCatEmotionDesc', color: '#69f0ae',
+        items: [
+          { type: '要求自证清白', detail: '非法转移举证责任。在法治和逻辑中，谁主张谁举证。例如"既然你说你没做过，拿出证据来！拿不出来就是心里有鬼"，让你陷入无止境证明的漩涡。' },
+          { type: '诉诸同情/比惨', detail: '用情感攻势替代规则和是非。例如"我都这么惨了，你还要跟我讲原则，你还是人吗？"，试图用同情心绕过规则和事实判断。' },
+          { type: '道德绑架', detail: '利用你的身份或与对方的关系，对你提出超额的道德要求。例如"你是个团队领导，受点委屈多包容怎么了？"，包容不等于纵容错误。' },
+          { type: '制造愧疚', detail: '将复杂系统的集体责任，单一归咎于你，激发你的负罪感。例如"都是因为你，整个项目才延期/大家才不快乐"，实际上延迟原因通常是多方面的。' },
+          { type: '恐惧诉求', detail: '制造恐慌来迫使你放弃理性判断。例如"如果不这样做，后果不堪设想！"让你在恐惧中来不及思考就接受对方的结论，恐惧越强烈，理性越薄弱。' },
+          { type: '群体施压/制造孤立', detail: '营造"所有人都觉得你不对"的氛围，让你觉得自己是唯一反对者从而自我怀疑。例如"大家都不站你这边，你还不想想为什么？"孤立感会让人放弃立场，但多数人的立场不等于正确。' }
+        ]
+      },
+      {
+        catKey: 'rhetoricCatInfo', descKey: 'rhetoricCatInfoDesc', color: '#ab47bc',
+        items: [
+          { type: '散布谣言', detail: '编造香艳、贪腐、背叛等符合大众猎奇心理的虚假故事。谣言因其戏剧性而传播极快，辟谣却枯燥无味，形成信息不对称。' },
+          { type: '断章取义', detail: '从你长篇发言中截取最易引发争议的几句，去除语境后全网传播。技术上毫无造假，但实质上完全背离原意，让你辩解成本极高。' },
+          { type: '海量骚扰轰炸', detail: '用大量重复、无意义、轻微辱骂的评论或私信，让你无法正常交流。目的是消耗你的精力，让你在情绪失控下犯错。' },
+          { type: '转移焦点', detail: '当A问题对你有利时，突然抛出另一个关于你的B丑闻（无论真假），引发新讨论。"围魏救赵"，用你的新回应来掩盖对方在上一个问题上的失利。' },
+          { type: '论点轰炸', detail: '短时间内抛出大量论点，每个只需一句话提出，但反驳每个都需要十倍篇幅。本质是消耗战，让你疲于奔命地逐条回应，最终观众只记得"他好像没答上来"。' },
+          { type: '伪造共识', detail: '用水军、重复评论、小号互赞来制造"大多数人都同意"的假象。例如评论区清一色支持某方，让你误以为自己是少数派，实际上真实民意被人为扭曲。' }
+        ]
+      },
+      {
+        catKey: 'rhetoricCatAgenda', descKey: 'rhetoricCatAgendaDesc', color: '#00bcd4',
+        items: [
+          { type: '框架设定', detail: '抢先定义问题的框架和讨论范围，让你只能在对方的地盘上辩论。例如将"是否应该提高透明度"重新定义为"是否要搞内斗"，你一旦进入对方设定的框架，就已经输了一半。' },
+          { type: '话语权垄断', detail: '不让你说话：拉黑、禁言、控制评论区、只允许支持者发言。当对方单方面关闭了你的发声渠道，任何"辩论"都只是表演，因为真正的辩论需要双方都能说话。' },
+          { type: '沉默螺旋', detail: '让反对者觉得自己是极少数，从而不敢发声。当周围看似只有一种声音时，持不同意见的人会选择沉默，沉默又进一步强化了"只有一种声音"的假象，形成恶性循环。' }
+        ]
+      }
+    ];
+
+    rhetoricData.forEach(function(cat) {
+      var section = document.createElement("div");
+      section.className = "舆论分类";
+
+      var header = document.createElement("div");
+      header.className = "舆论分类头";
+      var nameEl = document.createElement("span");
+      nameEl.className = "舆论分类名";
+      nameEl.style.color = cat.color;
+      nameEl.textContent = t(cat.catKey);
+      var descEl = document.createElement("span");
+      descEl.className = "舆论分类描述";
+      descEl.textContent = t(cat.descKey);
+      header.appendChild(nameEl);
+      header.appendChild(descEl);
+      section.appendChild(header);
+
+      var table = document.createElement("table");
+      table.className = "舆论表";
+      var thead = document.createElement("thead");
+      var headRow = document.createElement("tr");
+      [t('rhetoricColType'), t('rhetoricColDetail')].forEach(function(h) {
+        var th = document.createElement("th");
+        th.textContent = h;
+        headRow.appendChild(th);
+      });
+      thead.appendChild(headRow);
+      table.appendChild(thead);
+
+      var tbody = document.createElement("tbody");
+      cat.items.forEach(function(item) {
+        var tr = document.createElement("tr");
+
+        var typeTd = document.createElement("td");
+        typeTd.className = "舆论类型";
+        typeTd.style.color = cat.color;
+        typeTd.textContent = item.type;
+        tr.appendChild(typeTd);
+
+        var detailTd = document.createElement("td");
+        detailTd.className = "舆论详解";
+        detailTd.textContent = item.detail;
+        tr.appendChild(detailTd);
+
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+      section.appendChild(table);
+      container.appendChild(section);
+    });
+
+    tabPanels["tab-rhetoric"].appendChild(container);
+  })();
+
+  switchTab("tab-solo");
+  recalc();
+}
+
+(function initVisitCounter() {
+  var el = document.getElementById("visitCount");
+  if (!el) return;
+
+  function updateLabel() {
+    var labelEl = el.parentNode;
+    var before = labelEl.firstChild;
+    if (before && before.nodeType === 3) before.textContent = t('visitLabel');
+    var after = el.nextSibling;
+    if (after && after.nodeType === 3) after.textContent = ' ' + t('visitUnit');
+  }
+  updateLabel();
+
+  fetch("https://api.counterapi.dev/v1/poe2calc/visits/up")
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      el.textContent = data.count.toLocaleString();
+    });
+})();
+
+document.getElementById("langZh").addEventListener("click", function() {
+  if (L !== 'zh') setLang('zh');
+});
+document.getElementById("langEn").addEventListener("click", function() {
+  if (L !== 'en') setLang('en');
+});
+
+function renderAll() {
+  document.getElementById("langZh").classList.toggle("active", L === 'zh');
+  document.getElementById("langEn").classList.toggle("active", L === 'en');
+  configBar.exportBtn.textContent = t('exportBtn');
+  configBar.copyBtn.textContent = t('copyBtn');
+  configBar.importBtn.textContent = t('importBtn');
+  configBar.pasteBtn.textContent = t('pasteBtn');
+  configBar.exportInput.placeholder = t('exportPlaceholder');
+  configBar.importInput.placeholder = t('importPlaceholder');
+  var vcLabel = document.querySelector('.访问计数器');
+  if (vcLabel && vcLabel.firstChild && vcLabel.firstChild.nodeType === 3) vcLabel.firstChild.textContent = t('visitLabel');
+  var vcSpan = document.getElementById('visitCount');
+  if (vcSpan && vcSpan.nextSibling && vcSpan.nextSibling.nodeType === 3) vcSpan.nextSibling.textContent = ' ' + t('visitUnit');
+  initTitle();
+  initIntro();
+  initKeywords();
+  initCalcArea();
+}
+
+renderAll();
+</script>
+</body>
+</html>

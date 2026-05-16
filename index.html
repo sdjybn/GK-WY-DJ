@@ -749,16 +749,11 @@ body {
   function initCounter() {
     var el = document.getElementById('visitCount');
     if (!el) return;
-    var key = 'ai-script-era-views';
-    var stored = localStorage.getItem(key);
-    var count = stored ? parseInt(stored, 10) : 0;
-    var sessionKey = 'ai-script-era-session';
-    if (!sessionStorage.getItem(sessionKey)) {
-      count++;
-      localStorage.setItem(key, count);
-      sessionStorage.setItem(sessionKey, '1');
-    }
-    el.textContent = count;
+    fetch("https://api.counterapi.dev/v1/ai-script-era/visits/up")
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        el.textContent = data.count.toLocaleString();
+      });
   }
 
   revealSections();
